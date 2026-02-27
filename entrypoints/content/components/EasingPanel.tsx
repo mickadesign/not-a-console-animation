@@ -112,7 +112,7 @@ export function formatMs(ms: number | 'auto'): string {
 // even though the SVG uses preserveAspectRatio="none" (non-uniform scale).
 // Positions are computed as percentages matching the SVG coordinate system.
 
-function BezierDot({ x, y, size, opacity }: { x: number; y: number; size: number; opacity: number }) {
+function BezierDot({ x, y, size, color }: { x: number; y: number; size: number; color: string }) {
   const left   = `${((HPAD + x * W) / (W + 2 * HPAD)) * 100}%`
   const bottom = `${((PAD  + H * y) / (H + 2 * PAD )) * 100}%`
   return (
@@ -126,8 +126,7 @@ function BezierDot({ x, y, size, opacity }: { x: number; y: number; size: number
         width: size,
         height: size,
         borderRadius: '50%',
-        background: 'currentColor',
-        opacity,
+        background: color,
         pointerEvents: 'none',
       }}
     />
@@ -152,13 +151,13 @@ function EasingCurve({ easing }: { easing: ParsedEasing }) {
             <line
               x1={svgX(0)}        y1={svgY(0)}
               x2={svgX(easing.x1)} y2={svgY(easing.y1)}
-              stroke="currentColor" strokeWidth={1.5} opacity={0.3}
+              style={{ stroke: 'var(--toolbar-muted)' }} strokeWidth={1.5}
               vectorEffect="non-scaling-stroke"
             />
             <line
               x1={svgX(1)}        y1={svgY(1)}
               x2={svgX(easing.x2)} y2={svgY(easing.y2)}
-              stroke="currentColor" strokeWidth={1.5} opacity={0.3}
+              style={{ stroke: 'var(--toolbar-muted)' }} strokeWidth={1.5}
               vectorEffect="non-scaling-stroke"
             />
           </>
@@ -179,12 +178,12 @@ function EasingCurve({ easing }: { easing: ParsedEasing }) {
       {/* Perfectly round dots overlaid via HTML (immune to SVG aspect-ratio distortion) */}
       {easing.type === 'cubic-bezier' && (
         <>
-          {/* Anchor points at (0,0) and (1,1) */}
-          <BezierDot x={0} y={0} size={5} opacity={0.3} />
-          <BezierDot x={1} y={1} size={5} opacity={0.3} />
-          {/* Control points */}
-          <BezierDot x={easing.x1} y={easing.y1} size={8} opacity={0.6} />
-          <BezierDot x={easing.x2} y={easing.y2} size={8} opacity={0.6} />
+          {/* Anchor points at (0,0) and (1,1) — muted color, no transparency */}
+          <BezierDot x={0} y={0} size={5} color="var(--toolbar-muted)" />
+          <BezierDot x={1} y={1} size={5} color="var(--toolbar-muted)" />
+          {/* Control points — full curve-line color */}
+          <BezierDot x={easing.x1} y={easing.y1} size={8} color="currentColor" />
+          <BezierDot x={easing.x2} y={easing.y2} size={8} color="currentColor" />
         </>
       )}
     </div>
