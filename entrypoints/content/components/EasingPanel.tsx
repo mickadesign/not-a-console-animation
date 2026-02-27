@@ -68,6 +68,13 @@ function buildPath(easing: ParsedEasing): string {
   }
 }
 
+// ── Helpers ───────────────────────────────────────────────────────────
+
+function camelToKebab(s: string): string {
+  if (s.startsWith('--')) return s
+  return s.replace(/([A-Z])/g, c => '-' + c.toLowerCase())
+}
+
 // ── Formatting helpers ────────────────────────────────────────────────
 
 function getLabel(easing: ParsedEasing, raw: string): string {
@@ -143,14 +150,29 @@ export function EasingPanel({ anims, index, onIndexChange, inset }: EasingPanelP
             onClick={() => onIndexChange(Math.max(0, index - 1))}
             disabled={index === 0}
             aria-label="Previous animation"
-          >‹</button>
-          <span className="easing-nav-count">{index + 1} / {anims.length}</span>
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+          </button>
+          <div className="easing-nav-center">
+            <span className="easing-nav-prop">
+              {info.properties.length > 0
+                ? info.properties.slice(0, 2).map(camelToKebab).join(', ')
+                : 'animation'}
+            </span>
+            <span className="easing-nav-count">{index + 1} / {anims.length}</span>
+          </div>
           <button
             className="easing-nav-btn"
             onClick={() => onIndexChange(Math.min(anims.length - 1, index + 1))}
             disabled={index === anims.length - 1}
             aria-label="Next animation"
-          >›</button>
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </button>
         </div>
       )}
 
