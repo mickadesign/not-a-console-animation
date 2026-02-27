@@ -26,5 +26,9 @@ export async function readSessionState(): Promise<SlowMoSessionState | null> {
 }
 
 export function writeSessionState(state: SlowMoSessionState): void {
-  chrome.storage.session.set({ [KEY]: state }).catch(() => {})
+  try {
+    chrome.storage.session.set({ [KEY]: state }).catch(() => {})
+  } catch {
+    // Extension context invalidated — tab outlived the extension reload, ignore.
+  }
 }

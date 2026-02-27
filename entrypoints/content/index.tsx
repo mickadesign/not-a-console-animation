@@ -148,9 +148,15 @@ export default defineContentScript({
       }
     }
 
-    // Listen for toggle commands from background SW
+    // Listen for toggle commands from background SW.
+    // Guard with try/catch: if the extension is reloaded while this tab is
+    // still open, chrome.runtime becomes invalid and any access throws.
     chrome.runtime.onMessage.addListener((message) => {
-      if (message?.type === 'TOGGLE_TOOLBAR') toggleToolbar()
+      try {
+        if (message?.type === 'TOGGLE_TOOLBAR') toggleToolbar()
+      } catch {
+        // Extension context invalidated — silently ignore.
+      }
     })
 
     // ── Theme detection ────────────────────────────────────────────────
