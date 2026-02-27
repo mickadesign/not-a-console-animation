@@ -146,10 +146,6 @@
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 
-.toolbar.active {
-  border-color: var(--toolbar-active-border);
-  box-shadow: var(--toolbar-active-shadow);
-}
 
 /* ── Drag handle / header row ──────────────────────────────────────── */
 
