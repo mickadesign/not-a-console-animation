@@ -84,11 +84,31 @@ export function Toolbar({ onSpeedChange, onStateChange, initialEnabled = false, 
     return () => document.removeEventListener('slooow:set-enabled', handler)
   }, [])
 
-  // History capture — debounced pointermove, only while enabled
-  // Pointer settling on a new element for 80 ms triggers a snapshot.
+  // History capture — pointermove (hover settle) + pointerdown (click), only while enabled
   useEffect(() => {
     if (!enabled) return
 
+    // Dedup: skip if the same animation fingerprint was captured in the last 500 ms
+    let lastFp  = ''
+    let lastFpTs = 0
+
+    function animFingerprint(anims: AnimInfo[]): string {
+      return anims.map(a => `${a.properties.join(',')}|${a.duration}|${a.rawEasing}`).join(';')
+    }
+
+    function captureFromTarget(target: Element) {
+      const anims = collectAnimations(target)
+      if (!anims.length) return
+      const fp  = animFingerprint(anims)
+      const now = Date.now()
+      if (fp === lastFp && now - lastFpTs < 500) return
+      lastFp  = fp
+      lastFpTs = now
+      const id = ++historyIdRef.current
+      setHistoryGroups(prev => [...prev, { id, anims }].slice(-10))
+    }
+
+    // Hover: capture after pointer settles on a new element for 80 ms
     let lastTarget: Element | null = null
     let captureTimer: ReturnType<typeof setTimeout> | null = null
 
@@ -100,21 +120,24 @@ export function Toolbar({ onSpeedChange, onStateChange, initialEnabled = false, 
       if (captureTimer) clearTimeout(captureTimer)
       captureTimer = setTimeout(() => {
         captureTimer = null
-        const current = lastTarget
-        if (!current) return
-
-        const anims = collectAnimations(current)
-        if (!anims.length) return
-
-        const id    = ++historyIdRef.current
-        const group: HistoryGroup = { id, anims }
-        setHistoryGroups(prev => [...prev, group].slice(-10))
+        if (lastTarget) captureFromTarget(lastTarget)
       }, 80)
     }
 
-    document.addEventListener('pointermove', handlePointerMove, { passive: true })
+    // Click: wait 2 rAF cycles (~32 ms) so click-triggered animations have started
+    const handlePointerDown = (e: PointerEvent) => {
+      const target = e.target as Element | null
+      if (!target) return
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => { captureFromTarget(target) })
+      })
+    }
+
+    document.addEventListener('pointermove',  handlePointerMove,  { passive: true })
+    document.addEventListener('pointerdown',  handlePointerDown,  { passive: true })
     return () => {
       document.removeEventListener('pointermove', handlePointerMove)
+      document.removeEventListener('pointerdown', handlePointerDown)
       if (captureTimer) clearTimeout(captureTimer)
     }
   }, [enabled])
