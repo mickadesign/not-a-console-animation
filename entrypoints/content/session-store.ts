@@ -1,9 +1,11 @@
 /**
- * Thin wrapper around chrome.storage.session.
+ * Thin wrapper around chrome.storage.local.
  *
- * chrome.storage.session persists across page refreshes within the same
- * browser session and is cleared automatically when the browser closes.
- * It is global across all tabs — no host_permissions needed.
+ * chrome.storage.local is always accessible from content scripts (with the
+ * "storage" permission) without any setAccessLevel workaround. Unlike
+ * chrome.storage.session, state persists across browser restarts — which is
+ * fine here since users generally want their last speed/enabled preference
+ * remembered.
  */
 
 import type { SlowMoSpeed } from '../../src/shared/types'
@@ -18,7 +20,7 @@ const KEY = 'slowmo_state'
 
 export async function readSessionState(): Promise<SlowMoSessionState | null> {
   try {
-    const result = await chrome.storage.session.get(KEY)
+    const result = await chrome.storage.local.get(KEY)
     return (result[KEY] as SlowMoSessionState) ?? null
   } catch {
     return null
@@ -27,7 +29,7 @@ export async function readSessionState(): Promise<SlowMoSessionState | null> {
 
 export function writeSessionState(state: SlowMoSessionState): void {
   try {
-    chrome.storage.session.set({ [KEY]: state }).catch(() => {})
+    chrome.storage.local.set({ [KEY]: state }).catch(() => {})
   } catch {
     // Extension context invalidated — tab outlived the extension reload, ignore.
   }
