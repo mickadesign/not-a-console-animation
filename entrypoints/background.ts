@@ -3,6 +3,13 @@
 // when the user clicks the extension icon or presses Alt+Shift+S.
 
 export default defineBackground(() => {
+  // Allow content scripts to read/write chrome.storage.session.
+  // Without this, the default access level (TRUSTED_CONTEXTS_ONLY) silently
+  // blocks content-script access, so session state is never persisted.
+  chrome.storage.session.setAccessLevel({
+    accessLevel: 'TRUSTED_AND_UNTRUSTED_CONTEXTS',
+  })
+
   // chrome.action.onClicked fires when the user clicks the extension icon.
   // It also fires for the _execute_action keyboard command (Alt+Shift+S).
   chrome.action.onClicked.addListener((tab) => {

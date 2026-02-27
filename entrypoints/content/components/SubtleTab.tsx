@@ -87,9 +87,8 @@ const SubtleTab = forwardRef<HTMLDivElement, SubtleTabProps>(
       alignItems: 'center',
       gap: 2,
       userSelect: 'none',
-      overflowX: 'auto',
-      maxWidth: '100%',
-      padding: '4px 4px',
+      width: '100%',
+      padding: '4px 0',
       margin: '-4px 0',
       ...style,
     }
@@ -292,9 +291,11 @@ const SubtleTabItem = forwardRef<HTMLButtonElement, SubtleTabItemProps>(
           zIndex: 10,
           display: 'flex',
           alignItems: 'center',
+          justifyContent: 'center',
           gap: 6,
+          flex: 1,
           borderRadius: 9999,
-          padding: '5px 10px',
+          padding: '8px 10px',
           cursor: 'pointer',
           background: 'transparent',
           border: 'none',
@@ -317,7 +318,7 @@ const SubtleTabItem = forwardRef<HTMLButtonElement, SubtleTabItemProps>(
         <span
           style={{
             display: 'inline-grid',
-            fontSize: 12,
+            fontSize: 14,
             whiteSpace: 'nowrap',
           }}
         >
