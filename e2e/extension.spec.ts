@@ -38,7 +38,7 @@ async function clickExtensionIcon(ctx: BrowserContext, extId: string): Promise<v
 
 // ── Tests ─────────────────────────────────────────────────────────────
 
-test.describe('SlowMo Extension E2E', () => {
+test.describe('Slooow Extension E2E', () => {
   let ctx: BrowserContext
 
   test.beforeAll(async () => {
@@ -113,7 +113,7 @@ test.describe('SlowMo Extension E2E', () => {
 
     // Forge a SET_SPEED with wrong token — should have no effect
     await page.evaluate(() => {
-      window.postMessage({ tag: '__slowmo__', type: 'SET_SPEED', speed: 99, token: 'forgery' }, '*')
+      window.postMessage({ tag: '__slooow__', type: 'SET_SPEED', speed: 99, token: 'forgery' }, '*')
     })
     await page.waitForTimeout(100)
 
@@ -127,11 +127,11 @@ test.describe('SlowMo Extension E2E', () => {
     await page.goto(`file://${TEST_PAGES}/07-mixed.html`)
     await page.waitForTimeout(500)
 
-    // Top frame: slowmo-toolbar host WILL exist after extension injects content script
-    // iframe: should have no slowmo-toolbar host
+    // Top frame: slooow-toolbar host WILL exist after extension injects content script
+    // iframe: should have no slooow-toolbar host
     const iframeCount = await page
       .frameLocator('iframe')
-      .locator('slowmo-toolbar')
+      .locator('slooow-toolbar')
       .count()
       .catch(() => 0)
 
@@ -139,27 +139,27 @@ test.describe('SlowMo Extension E2E', () => {
     await page.close()
   })
 
-  test('rAF patch is idempotent — __slowmoPatched flag prevents double-patch', async () => {
+  test('rAF patch is idempotent — __slooowPatched flag prevents double-patch', async () => {
     const page = await ctx.newPage()
     await page.goto(`file://${TEST_PAGES}/01-css-transition.html`)
     await page.waitForTimeout(500)
 
-    const patched = await page.evaluate(() => !!(window as any).__slowmoPatched)
+    const patched = await page.evaluate(() => !!(window as any).__slooowPatched)
     expect(patched).toBe(true)
 
-    // Verify only one layer of patching: the rAF function name should be 'slowmoRAF'
+    // Verify only one layer of patching: the rAF function name should be 'slooowRAF'
     const fnName = await page.evaluate(() => window.requestAnimationFrame.name)
-    expect(fnName).toBe('slowmoRAF')
+    expect(fnName).toBe('slooowRAF')
 
     await page.close()
   })
 
-  test('inject.ts sets __slowmoToken on window', async () => {
+  test('inject.ts sets __slooowToken on window', async () => {
     const page = await ctx.newPage()
     await page.goto(`file://${TEST_PAGES}/01-css-transition.html`)
     await page.waitForTimeout(300)
 
-    const token = await page.evaluate(() => (window as any).__slowmoToken)
+    const token = await page.evaluate(() => (window as any).__slooowToken)
     expect(typeof token).toBe('string')
     expect(token.length).toBeGreaterThan(0)
 

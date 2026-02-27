@@ -1,16 +1,16 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { SlowMoSpeed, SLOWMO_SPEEDS } from '../../src/shared/types'
+import { SlooowSpeed, SLOOOW_SPEEDS } from '../../src/shared/types'
 import { SubtleTab, SubtleTabItem } from './components/SubtleTab'
 import { Switch } from './components/Switch'
 import { StatusBadges } from './StatusBadges'
 import { springs } from './lib/springs'
 
 interface ToolbarProps {
-  onSpeedChange: (speed: SlowMoSpeed | null) => void
-  onStateChange?: (state: { enabled: boolean; speed: SlowMoSpeed }) => void
+  onSpeedChange: (speed: SlooowSpeed | null) => void
+  onStateChange?: (state: { enabled: boolean; speed: SlooowSpeed }) => void
   initialEnabled?: boolean
-  initialSpeed?: SlowMoSpeed
+  initialSpeed?: SlooowSpeed
 }
 
 interface Status {
@@ -21,7 +21,7 @@ interface Status {
 
 export function Toolbar({ onSpeedChange, onStateChange, initialEnabled = false, initialSpeed = 0.25 }: ToolbarProps) {
   const [enabled, setEnabled] = useState(initialEnabled)
-  const [speed, setSpeed] = useState<SlowMoSpeed>(initialSpeed)
+  const [speed, setSpeed] = useState<SlooowSpeed>(initialSpeed)
   const [status, setStatus] = useState<Status>({
     rafIntercepted: false,
     gsapDetected: false,
@@ -40,15 +40,15 @@ export function Toolbar({ onSpeedChange, onStateChange, initialEnabled = false, 
       const detail = (e as CustomEvent<Partial<Status>>).detail
       setStatus((prev) => ({ ...prev, ...detail }))
     }
-    document.addEventListener('slowmo:status', handler)
-    return () => document.removeEventListener('slowmo:status', handler)
+    document.addEventListener('slooow:status', handler)
+    return () => document.removeEventListener('slooow:status', handler)
   }, [])
 
   // Enable slow-mo whenever the toolbar is shown via the extension icon
   useEffect(() => {
     const handler = () => setEnabled(true)
-    document.addEventListener('slowmo:set-enabled', handler)
-    return () => document.removeEventListener('slowmo:set-enabled', handler)
+    document.addEventListener('slooow:set-enabled', handler)
+    return () => document.removeEventListener('slooow:set-enabled', handler)
   }, [])
 
   // Refresh WAAPI animation count every second while enabled
@@ -70,7 +70,7 @@ export function Toolbar({ onSpeedChange, onStateChange, initialEnabled = false, 
     setEnabled((prev) => !prev)
   }, [])
 
-  const handleSpeedSelect = useCallback((newSpeed: SlowMoSpeed) => {
+  const handleSpeedSelect = useCallback((newSpeed: SlooowSpeed) => {
     setSpeed(newSpeed)
     if (!enabled) setEnabled(true) // selecting a speed implicitly enables
   }, [enabled])
@@ -117,11 +117,11 @@ export function Toolbar({ onSpeedChange, onStateChange, initialEnabled = false, 
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
       >
-        <span className="logo">SlowMo</span>
+        <span className="logo">Slooow</span>
         <Switch
           checked={enabled}
           onToggle={handleToggle}
-          title={enabled ? 'Click to disable slow-mo' : 'Click to enable slow-mo'}
+          title={enabled ? 'Click to disable Slooow' : 'Click to enable Slooow'}
         />
       </div>
 
@@ -141,11 +141,11 @@ export function Toolbar({ onSpeedChange, onStateChange, initialEnabled = false, 
             {/* Inner div provides spacing — padding is clipped when height is 0 */}
             <div style={{ paddingTop: 9 }}>
               <SubtleTab
-                selectedIndex={SLOWMO_SPEEDS.indexOf(speed)}
-                onSelect={(idx) => handleSpeedSelect(SLOWMO_SPEEDS[idx])}
+                selectedIndex={SLOOOW_SPEEDS.indexOf(speed)}
+                onSelect={(idx) => handleSpeedSelect(SLOOOW_SPEEDS[idx])}
                 style={{ marginBottom: 8 }}
               >
-                {SLOWMO_SPEEDS.map((s, idx) => (
+                {SLOOOW_SPEEDS.map((s, idx) => (
                   <SubtleTabItem
                     key={s}
                     index={idx}

@@ -6,7 +6,7 @@ export default defineConfig({
     plugins: [react()],
   }),
   manifest: {
-    name: 'SlowMo',
+    name: 'Slooow',
     description: 'Slow down web animations in real time. For designers.',
     version: '1.0.0',
     permissions: ['scripting', 'activeTab', 'storage'],
@@ -18,7 +18,7 @@ export default defineConfig({
       128: 'icons/icon128.png',
     },
     action: {
-      default_title: 'Toggle SlowMo toolbar',
+      default_title: 'Toggle Slooow toolbar',
       default_icon: {
         16:  'icons/icon16.png',
         48:  'icons/icon48.png',
@@ -28,7 +28,7 @@ export default defineConfig({
     commands: {
       _execute_action: {
         suggested_key: { default: 'Alt+Shift+S' },
-        description: 'Toggle SlowMo toolbar',
+        description: 'Toggle Slooow toolbar',
       },
     },
   },

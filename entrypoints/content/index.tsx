@@ -7,7 +7,7 @@
 
 import React from 'react'
 import { createRoot } from 'react-dom/client'
-import { SlowMoSpeed, SLOWMO_TAG } from '../../src/shared/types'
+import { SlooowSpeed, SLOOOW_TAG } from '../../src/shared/types'
 import { applyWAAPI, resetWAAPI, countWAAPI, setObserverEnabled, startWAAPIObserver } from './waapi'
 import { applyGSAP, resetGSAP, startGSAPPolling } from './gsap'
 import { sendSetSpeed, readToken } from './bridge'
@@ -27,19 +27,19 @@ export default defineContentScript({
     // ── Restore persisted session state ───────────────────────────────
     const stored = await readSessionState()
     let visible            = stored?.visible ?? false
-    let currentSpeed: SlowMoSpeed | null = stored?.enabled ? (stored.speed ?? 0.25) : null
-    let persistedSpeed: SlowMoSpeed      = stored?.speed   ?? 0.25
+    let currentSpeed: SlooowSpeed | null = stored?.enabled ? (stored.speed ?? 0.25) : null
+    let persistedSpeed: SlooowSpeed      = stored?.speed   ?? 0.25
     let gsapDetected = false
 
     // ── Read inject.ts status synchronously ───────────────────────────
-    const rafIntercepted = !!(window as any).__slowmoToken
+    const rafIntercepted = !!(window as any).__slooowToken
     const initialGSAPDetected = typeof (window as any).gsap !== 'undefined'
     gsapDetected = initialGSAPDetected
 
     dispatchStatusEvent({ rafIntercepted, gsapDetected, animationCount: countWAAPI() })
 
     // ── Layer coordination ─────────────────────────────────────────────
-    function applyAllLayers(speed: SlowMoSpeed | null): void {
+    function applyAllLayers(speed: SlooowSpeed | null): void {
       const effectiveSpeed = speed ?? 1
 
       // Layer 1: WAAPI
@@ -84,7 +84,7 @@ export default defineContentScript({
     window.addEventListener('message', (e: MessageEvent) => {
       if (e.source !== window) return
       const d = e.data
-      if (!d || d.tag !== SLOWMO_TAG || d.type !== 'SLOWMO_STATUS_REPORT') return
+      if (!d || d.tag !== SLOOOW_TAG || d.type !== 'SLOOOW_STATUS_REPORT') return
       if (d.gsapDetected && !gsapDetected) {
         gsapDetected = true
         dispatchStatusEvent({ gsapDetected: true })
@@ -93,7 +93,7 @@ export default defineContentScript({
 
     // ── Toolbar mount via Shadow DOM ───────────────────────────────────
     const ui = await createShadowRootUi(ctx, {
-      name: 'slowmo-toolbar',
+      name: 'slooow-toolbar',
       position: 'overlay',
       zIndex: 2147483647,
       onMount(container, shadow) {
@@ -139,9 +139,9 @@ export default defineContentScript({
       hostEl.style.display = visible ? '' : 'none'
       writeSessionState({ visible, enabled: currentSpeed !== null, speed: persistedSpeed })
       if (visible) {
-        document.dispatchEvent(new CustomEvent('slowmo:set-enabled', { detail: { enabled: true } }))
+        document.dispatchEvent(new CustomEvent('slooow:set-enabled', { detail: { enabled: true } }))
         dispatchStatusEvent({
-          rafIntercepted: !!(window as any).__slowmoToken,
+          rafIntercepted: !!(window as any).__slooowToken,
           gsapDetected,
           animationCount: countWAAPI(),
         })
@@ -187,5 +187,5 @@ export default defineContentScript({
 // ── Helpers ────────────────────────────────────────────────────────────
 
 function dispatchStatusEvent(detail: Record<string, unknown>): void {
-  document.dispatchEvent(new CustomEvent('slowmo:status', { detail }))
+  document.dispatchEvent(new CustomEvent('slooow:status', { detail }))
 }

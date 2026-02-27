@@ -14,27 +14,27 @@
  * when the tab is closed.
  */
 
-import type { SlowMoSpeed } from '../../src/shared/types'
+import type { SlooowSpeed } from '../../src/shared/types'
 
-export interface SlowMoSessionState {
+export interface SlooowSessionState {
   visible: boolean
   enabled: boolean
-  speed: SlowMoSpeed
+  speed: SlooowSpeed
 }
 
-const KEY = '__slowmo_state'
+const KEY = '__slooow_state'
 
-export async function readSessionState(): Promise<SlowMoSessionState | null> {
+export async function readSessionState(): Promise<SlooowSessionState | null> {
   try {
     const raw = sessionStorage.getItem(KEY)
     if (!raw) return null
-    return JSON.parse(raw) as SlowMoSessionState
+    return JSON.parse(raw) as SlooowSessionState
   } catch {
     return null
   }
 }
 
-export function writeSessionState(state: SlowMoSessionState): void {
+export function writeSessionState(state: SlooowSessionState): void {
   try {
     sessionStorage.setItem(KEY, JSON.stringify(state))
   } catch {
