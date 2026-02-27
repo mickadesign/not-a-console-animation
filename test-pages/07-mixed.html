@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SlowMo Test — All Layers Simultaneously</title>
+  <style>
+    body { font-family: system-ui; background: #0f0f14; color: #ddd; display: flex; flex-direction: column; align-items: center; padding: 40px 20px; gap: 32px; margin: 0; }
+    h1 { font-size: 16px; color: #888; margin: 0; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; width: 560px; }
+    .cell { border: 1px solid #2e2e42; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+    .label { font-size: 11px; color: #666; text-align: center; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner { width: 50px; height: 50px; border-radius: 50%; border: 3px solid #2e2e42; border-top-color: #6c63ff; animation: spin 1s linear infinite; }
+    .gsap-box { width: 50px; height: 50px; border-radius: 10px; background: #ff6370; }
+    #raf-counter { font-size: 32px; font-weight: 700; color: #ffd166; font-variant-numeric: tabular-nums; }
+    button { padding: 8px 16px; border-radius: 8px; border: 1px solid #3a3a52; background: #252535; color: #ccc; cursor: pointer; font-size: 12px; }
+    /* Iframe isolation test */
+    iframe { border: 1px solid #2e2e42; border-radius: 8px; width: 300px; height: 80px; }
+    .iframe-label { font-size: 11px; color: #666; }
+  </style>
+</head>
+<body>
+  <h1>All Layers — CSS + GSAP + Custom rAF</h1>
+  <div class="grid">
+    <div class="cell">
+      <div class="spinner"></div>
+      <div class="label">CSS @keyframes</div>
+    </div>
+    <div class="cell">
+      <div class="gsap-box" id="gsap-box"></div>
+      <button onclick="runGSAP()">GSAP tween</button>
+      <div class="label">GSAP gsap.to()</div>
+    </div>
+    <div class="cell">
+      <div id="raf-counter">0</div>
+      <div class="label">Custom rAF counter</div>
+    </div>
+  </div>
+
+  <!-- Iframe: toolbar should NOT appear inside this -->
+  <div class="iframe-label">iframe (toolbar should stay out)</div>
+  <iframe src="about:blank" id="test-iframe"></iframe>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script>
+    // rAF counter
+    let count = 0, lastTs = null
+    function tick(ts) {
+      if (!lastTs) lastTs = ts
+      if (ts - lastTs >= 16) { count++; lastTs = ts }
+      document.getElementById('raf-counter').textContent = count
+      requestAnimationFrame(tick)
+    }
+    requestAnimationFrame(tick)
+
+    // GSAP
+    function runGSAP() {
+      if (!window.gsap) return
+      gsap.to('#gsap-box', { x: 140, duration: 1, ease: 'power2.inOut', yoyo: true, repeat: 1 })
+    }
+  </script>
+</body>
+</html>

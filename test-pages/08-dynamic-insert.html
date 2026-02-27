@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SlowMo Test — Dynamic Animation (MutationObserver)</title>
+  <style>
+    body { font-family: system-ui; background: #0f0f14; color: #ddd; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; gap: 24px; margin: 0; }
+    h1 { font-size: 16px; color: #888; margin: 0; }
+    #container { min-height: 120px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; justify-content: center; }
+    @keyframes fadein { from { opacity: 0; transform: scale(0.6) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+    .card {
+      width: 80px; height: 80px; border-radius: 14px;
+      background: #6c63ff;
+      animation: fadein 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+    #countdown { font-size: 32px; font-weight: 700; color: #ffd166; font-variant-numeric: tabular-nums; }
+    .info { font-size: 13px; color: #666; text-align: center; max-width: 360px; }
+    button { padding: 8px 16px; border-radius: 8px; border: 1px solid #3a3a52; background: #252535; color: #ccc; cursor: pointer; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <h1>Layer 1 — MutationObserver picks up dynamically inserted animations</h1>
+  <div id="countdown">3</div>
+  <div id="container"></div>
+  <button onclick="insertCard()">Insert card now</button>
+  <div class="info">
+    Cards auto-insert every 2s. Activate SlowMo first, then watch each card's
+    entrance animation — it should play at the selected speed even though the
+    card wasn't in the DOM when you activated.
+  </div>
+  <script>
+    let n = 0
+
+    function insertCard() {
+      const card = document.createElement('div')
+      card.className = 'card'
+      card.style.background = `hsl(${(n * 47) % 360}, 70%, 60%)`
+      document.getElementById('container').appendChild(card)
+      n++
+    }
+
+    // Auto-insert every 2 seconds
+    let count = 3
+    function autoInsert() {
+      count--
+      document.getElementById('countdown').textContent = count <= 0 ? '↓' : count
+      if (count <= 0) {
+        insertCard()
+        count = 3
+      }
+      setTimeout(autoInsert, 1000)
+    }
+    setTimeout(autoInsert, 1000)
+  </script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SlowMo Test — CSS Keyframes</title>
+  <style>
+    body { font-family: system-ui; background: #0f0f14; color: #ddd; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; gap: 32px; margin: 0; }
+    h1 { font-size: 16px; color: #888; margin: 0; }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-60px); }
+    }
+    .spinner {
+      width: 80px; height: 80px; border-radius: 50%;
+      border: 4px solid #2e2e42;
+      border-top-color: #6c63ff;
+      animation: spin 1s linear infinite;
+    }
+    .bouncer {
+      width: 60px; height: 60px; border-radius: 50%;
+      background: #ff6370;
+      animation: bounce 1.2s ease-in-out infinite;
+    }
+    .row { display: flex; gap: 48px; align-items: center; }
+    .info { font-size: 13px; color: #666; text-align: center; max-width: 320px; }
+  </style>
+</head>
+<body>
+  <h1>Layer 1 — CSS @keyframes (always playing)</h1>
+  <div class="row">
+    <div class="spinner"></div>
+    <div class="bouncer"></div>
+  </div>
+  <div class="info">
+    At 0.25× the spinner and bouncer should run 4× slower.<br>
+    <code>document.getAnimations()</code> should return 2 entries.
+  </div>
+</body>
+</html>

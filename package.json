@@ -1,0 +1,29 @@
+{
+  "name": "slowmo",
+  "version": "1.0.0",
+  "description": "Slow down web animations in real time. For designers.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wxt dev",
+    "build": "wxt build",
+    "zip": "wxt zip",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "e2e": "playwright test",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "wxt": "^0.19.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "typescript": "^5.5.3",
+    "vitest": "^2.1.0",
+    "@playwright/test": "^1.47.0"
+  }
+}

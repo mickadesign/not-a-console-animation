@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SlowMo Test — Custom rAF Loop</title>
+  <style>
+    body { font-family: system-ui; background: #0f0f14; color: #ddd; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; gap: 32px; margin: 0; }
+    h1 { font-size: 16px; color: #888; margin: 0; }
+    #counter { font-size: 72px; font-weight: 700; font-variant-numeric: tabular-nums; color: #6c63ff; letter-spacing: -2px; }
+    #rate-display { font-size: 13px; color: #666; font-family: monospace; }
+    .canvas-box { width: 400px; height: 120px; border: 1px solid #2e2e42; border-radius: 12px; overflow: hidden; }
+    canvas { display: block; }
+    .info { font-size: 13px; color: #666; text-align: center; max-width: 360px; }
+  </style>
+</head>
+<body>
+  <h1>Layer 3 — Custom requestAnimationFrame loop</h1>
+
+  <!-- Visible counter: increments each virtual "frame" (16ms virtual time) -->
+  <div id="counter">0</div>
+  <div id="rate-display">frames/s: —</div>
+
+  <!-- Canvas animation: a ball bouncing using rAF timestamps -->
+  <div class="canvas-box">
+    <canvas id="cv" width="400" height="120"></canvas>
+  </div>
+
+  <div class="info">
+    The counter uses a custom rAF loop and counts at ~60fps normally.<br>
+    At 0.25× it should count at ~15fps (4× slower).<br>
+    The ball's speed should also drop 4×.
+  </div>
+
+  <script>
+    // ── Counter (counts virtual frame ticks) ──────────────────────────
+    let count = 0
+    let lastVirtualTs = null
+    let fpsHistory = []
+    let lastFpsSample = performance.now()
+    let framesSinceLastSample = 0
+
+    function tick(ts) {
+      if (lastVirtualTs === null) {
+        lastVirtualTs = ts
+      }
+      // Count every 16ms of VIRTUAL time
+      if (ts - lastVirtualTs >= 16) {
+        count++
+        lastVirtualTs = ts
+        document.getElementById('counter').textContent = count
+      }
+
+      // FPS measurement (based on real time, not virtual)
+      framesSinceLastSample++
+      const now = performance.now()
+      if (now - lastFpsSample >= 500) {
+        const fps = Math.round(framesSinceLastSample / ((now - lastFpsSample) / 1000))
+        document.getElementById('rate-display').textContent = `rAF calls/s: ${fps}`
+        framesSinceLastSample = 0
+        lastFpsSample = now
+      }
+
+      requestAnimationFrame(tick)
+    }
+    requestAnimationFrame(tick)
+
+    // ── Bouncing ball on canvas ────────────────────────────────────────
+    const canvas = document.getElementById('cv')
+    const ctx = canvas.getContext('2d')
+    let ballX = 40
+    let ballVx = 2 // px per virtual ms
+    let lastBallTs = null
+
+    function drawBall(ts) {
+      if (lastBallTs === null) lastBallTs = ts
+
+      const dtVirtual = ts - lastBallTs // virtual milliseconds
+      lastBallTs = ts
+
+      ballX += ballVx * dtVirtual * 0.3
+      if (ballX > canvas.width - 30) { ballX = canvas.width - 30; ballVx = -Math.abs(ballVx) }
+      if (ballX < 30) { ballX = 30; ballVx = Math.abs(ballVx) }
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      ctx.fillStyle = '#6c63ff'
+      ctx.beginPath()
+      ctx.arc(ballX, 60, 24, 0, Math.PI * 2)
+      ctx.fill()
+
+      requestAnimationFrame(drawBall)
+    }
+    requestAnimationFrame(drawBall)
+  </script>
+</body>
+</html>

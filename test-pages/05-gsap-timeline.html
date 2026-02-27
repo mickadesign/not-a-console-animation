@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SlowMo Test — GSAP Timeline (non-1x original timeScale)</title>
+  <style>
+    body { font-family: system-ui; background: #0f0f14; color: #ddd; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; gap: 32px; margin: 0; }
+    h1 { font-size: 16px; color: #888; margin: 0; }
+    #stage { width: 400px; height: 100px; position: relative; border: 1px solid #2e2e42; border-radius: 12px; overflow: hidden; }
+    .dot { width: 40px; height: 40px; border-radius: 50%; position: absolute; top: 30px; }
+    .d1 { background: #6c63ff; left: 10px; }
+    .d2 { background: #ff6370; left: 70px; }
+    .d3 { background: #ffd166; left: 130px; }
+    button { padding: 10px 20px; border-radius: 8px; border: 1px solid #3a3a52; background: #252535; color: #ccc; cursor: pointer; font-size: 13px; }
+    .ts-display { font-family: monospace; font-size: 13px; background: #1a1a28; padding: 8px 16px; border-radius: 8px; }
+    .info { font-size: 13px; color: #666; text-align: center; max-width: 360px; }
+  </style>
+</head>
+<body>
+  <h1>Layer 2 — GSAP Timeline (original timeScale = 2)</h1>
+  <div id="stage">
+    <div class="dot d1" id="d1"></div>
+    <div class="dot d2" id="d2"></div>
+    <div class="dot d3" id="d3"></div>
+  </div>
+  <button onclick="runTimeline()">Run staggered timeline</button>
+  <div class="ts-display" id="ts-display">globalTimeline.timeScale(): —</div>
+  <div class="info">
+    ⚠️ This page sets <code>gsap.globalTimeline.timeScale(2)</code> on load.<br>
+    Toggling SlowMo off should restore to <strong>2</strong>, not 1.<br>
+    Watch the display above — it updates every 500ms.
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script>
+    window.addEventListener('load', () => {
+      // Simulate a site that already runs at 2x speed
+      if (window.gsap) {
+        gsap.globalTimeline.timeScale(2)
+        console.log('[test] Set initial timeScale to 2')
+      }
+    })
+
+    function runTimeline() {
+      if (!window.gsap) { alert('GSAP not loaded'); return }
+      const tl = gsap.timeline({ repeat: -1, yoyo: true })
+      tl.to('#d1', { x: 300, duration: 0.4, ease: 'power1.inOut' })
+        .to('#d2', { x: 250, duration: 0.4, ease: 'power1.inOut' }, '-=0.2')
+        .to('#d3', { x: 200, duration: 0.4, ease: 'power1.inOut' }, '-=0.2')
+    }
+
+    // Show live timeScale value
+    setInterval(() => {
+      if (window.gsap) {
+        const ts = gsap.globalTimeline.timeScale().toFixed(3)
+        document.getElementById('ts-display').textContent = `globalTimeline.timeScale(): ${ts}`
+      }
+    }, 200)
+  </script>
+</body>
+</html>

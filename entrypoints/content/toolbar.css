@@ -1,0 +1,175 @@
+/* Injected as a string into Shadow DOM via ?inline import.
+   Uses :host for resets — isolated from all host page styles.
+   No Tailwind: Tailwind v4 has :root/:host variable scoping issues in Shadow DOM. */
+
+:host {
+  all: initial;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+  font-size: 13px;
+  line-height: 1.4;
+  color-scheme: dark;
+}
+
+/* ── Toolbar shell ─────────────────────────────────────────────────── */
+
+.toolbar {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #18181f;
+  border: 1px solid #2e2e42;
+  border-radius: 12px;
+  padding: 10px 12px 8px;
+  min-width: 210px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255,255,255,0.04);
+  color: #d8d8e8;
+  user-select: none;
+  pointer-events: all;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.toolbar.active {
+  border-color: #6c63ff;
+  box-shadow: 0 8px 32px rgba(108, 99, 255, 0.25), 0 0 0 1px rgba(108,99,255,0.15);
+}
+
+/* ── Drag handle / header row ──────────────────────────────────────── */
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: grab;
+  margin-bottom: 9px;
+  gap: 8px;
+}
+
+.header:active {
+  cursor: grabbing;
+}
+
+.logo {
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: -0.2px;
+  color: #6c63ff;
+  flex: 1;
+  pointer-events: none;
+}
+
+.hint {
+  font-size: 10px;
+  color: #555570;
+  pointer-events: none;
+}
+
+/* ── Toggle button ─────────────────────────────────────────────────── */
+
+.toggle {
+  padding: 3px 10px;
+  border-radius: 20px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.3px;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+  flex-shrink: 0;
+}
+
+.toggle.on {
+  background: #6c63ff;
+  border-color: #6c63ff;
+  color: #fff;
+}
+
+.toggle.off {
+  background: #252535;
+  border-color: #3a3a52;
+  color: #666680;
+}
+
+.toggle:hover {
+  filter: brightness(1.1);
+}
+
+/* ── Speed selector ────────────────────────────────────────────────── */
+
+.speeds {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 8px;
+}
+
+.speed-btn {
+  flex: 1;
+  padding: 5px 0;
+  border: 1px solid #2e2e42;
+  border-radius: 7px;
+  background: #202030;
+  color: #888898;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 500;
+  font-family: inherit;
+  transition: all 0.1s;
+}
+
+.speed-btn:hover:not(:disabled) {
+  border-color: #6c63ff;
+  color: #c0bcff;
+  background: #252540;
+}
+
+.speed-btn.active {
+  background: #6c63ff;
+  border-color: #6c63ff;
+  color: #fff;
+  font-weight: 600;
+}
+
+.speed-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* ── Status badges ─────────────────────────────────────────────────── */
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  min-height: 18px;
+}
+
+.badge {
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+}
+
+.badge-raf {
+  background: #0f2820;
+  color: #4ecba0;
+  border: 1px solid #1a4035;
+}
+
+.badge-gsap {
+  background: #1a1230;
+  color: #8899ff;
+  border: 1px solid #2a1f50;
+}
+
+.badge-waapi {
+  background: #201a0a;
+  color: #d4a640;
+  border: 1px solid #3a2f10;
+}
+
+.badge-inactive {
+  background: #1a1a28;
+  color: #44445a;
+  border: 1px solid #22223a;
+}

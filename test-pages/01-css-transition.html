@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SlowMo Test — CSS Transitions</title>
+  <style>
+    body { font-family: system-ui; background: #0f0f14; color: #ddd; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; gap: 32px; margin: 0; }
+    h1 { font-size: 16px; color: #888; margin: 0; }
+    .box {
+      width: 100px; height: 100px; border-radius: 16px;
+      background: #6c63ff;
+      transition: transform 0.6s ease-in-out, background 0.6s ease-in-out;
+      cursor: pointer;
+    }
+    .box:hover {
+      transform: translateX(120px) rotate(45deg);
+      background: #ff6370;
+    }
+    .info { font-size: 13px; color: #666; text-align: center; max-width: 320px; }
+  </style>
+</head>
+<body>
+  <h1>Layer 1 — CSS Transition (hover to animate)</h1>
+  <div class="box" title="Hover me"></div>
+  <div class="info">
+    At 0.25× the hover animation should take ~2.4s instead of 0.6s.<br>
+    Restoring to 1× should feel normal.
+  </div>
+</body>
+</html>
