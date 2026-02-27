@@ -3,10 +3,11 @@
  * Generates PNG icons for the SlowMo Chrome extension.
  * Pure Node.js — no external dependencies (uses built-in zlib).
  *
- * Icon design:
- *   • Dark rounded-square background (#0f0f14)
- *   • Two vertical purple bars (⏸ pause = slow motion concept) in #6c63ff
- *   • Yellow accent dot bottom-right (#ffd166) — omitted at 16px (too small)
+ * Icon design (matches provided logo):
+ *   • Octagon shape (stop-sign style, 45° corner cuts)
+ *   • Orange → red vertical gradient (#ff7a33 → #ff2d00)
+ *   • Two white vertical pause bars centred
+ *   • Anti-aliased edges via 4×4 supersampling
  */
 
 import { deflateSync } from 'zlib'
@@ -41,7 +42,7 @@ function pngChunk(type, data) {
 function encodePNG(width, height, getPixel) {
   const rows = []
   for (let y = 0; y < height; y++) {
-    const row = Buffer.alloc(1 + width * 4) // filter byte + RGBA
+    const row = Buffer.alloc(1 + width * 4)
     for (let x = 0; x < width; x++) {
       const [r, g, b, a] = getPixel(x, y)
       row[1 + x * 4]     = r
@@ -62,42 +63,63 @@ function encodePNG(width, height, getPixel) {
   ])
 }
 
-// ── Icon renderer (scales with 'size') ────────────────────────────────────────
+// ── Shape & colour helpers ────────────────────────────────────────────────────
+
+// Returns true if (px, py) is inside the octagon (45° corner cuts of size `cut`)
+function inOctagon(px, py, size, cut) {
+  if (px < 0 || px > size || py < 0 || py > size) return false
+  if (px + py < cut) return false
+  if ((size - px) + py < cut) return false
+  if (px + (size - py) < cut) return false
+  if ((size - px) + (size - py) < cut) return false
+  return true
+}
+
+// Orange → red gradient interpolated by y position
+function gradientColor(y, size) {
+  const t = y / size
+  // top: #ff7a33 = rgb(255, 122, 51)  bottom: #ff2d00 = rgb(255, 45, 0)
+  return [
+    255,
+    Math.round(122 * (1 - t) + 45 * t),
+    Math.round(51  * (1 - t) + 0  * t),
+  ]
+}
+
+// ── Pixel renderer ────────────────────────────────────────────────────────────
 
 function renderPixel(x, y, size) {
-  const cr = size * 0.20 // corner radius
+  const cut = size * 0.22   // corner cut — controls how octagon-like the shape is
 
-  // Rounded-rectangle hit test
-  const ax = Math.abs(x - size / 2), ay = Math.abs(y - size / 2)
-  const hw = size / 2 - cr, hh = size / 2 - cr
-  const inRR =
-    (ax <= hw) ? ay <= size / 2 :
-    (ay <= hh) ? ax <= size / 2 :
-    (ax - hw) ** 2 + (ay - hh) ** 2 <= cr ** 2
+  // 4×4 supersampling for anti-aliased edges
+  const SS = 4
+  let coverage = 0
+  for (let sy = 0; sy < SS; sy++) {
+    for (let sx = 0; sx < SS; sx++) {
+      const px = x + (sx + 0.5) / SS
+      const py = y + (sy + 0.5) / SS
+      if (inOctagon(px, py, size, cut)) coverage++
+    }
+  }
+  if (coverage === 0) return [0, 0, 0, 0]
+  const alpha = Math.round((coverage / (SS * SS)) * 255)
 
-  if (!inRR) return [0, 0, 0, 0] // transparent
+  // Gradient background colour at this y
+  const [r, g, b] = gradientColor(y, size)
 
-  // Pause bars — purple #6c63ff
-  const barW  = Math.max(2, Math.round(size * 0.13))
-  const barH  = Math.round(size * 0.42)
+  // Pause bars — white, centred
+  const barW   = Math.max(2, Math.round(size * 0.13))
+  const barH   = Math.round(size * 0.44)
   const barTop = Math.round((size - barH) / 2)
-  const b1L   = Math.round(size * 0.27)
-  const b2L   = Math.round(size * 0.52)
+  const b1L    = Math.round(size * 0.27)
+  const b2L    = Math.round(size * 0.52)
 
   if (
     (x >= b1L && x < b1L + barW && y >= barTop && y < barTop + barH) ||
     (x >= b2L && x < b2L + barW && y >= barTop && y < barTop + barH)
-  ) return [108, 99, 255, 255]
+  ) return [255, 255, 255, alpha]
 
-  // Accent dot — yellow #ffd166 (only at 48px+; too small at 16px)
-  if (size >= 48) {
-    const dCX = size * 0.72, dCY = size * 0.73
-    const dR  = size * 0.09
-    if ((x - dCX) ** 2 + (y - dCY) ** 2 <= dR ** 2) return [255, 209, 102, 255]
-  }
-
-  // Background #0f0f14
-  return [15, 15, 20, 255]
+  return [r, g, b, alpha]
 }
 
 // ── Emit files ────────────────────────────────────────────────────────────────
