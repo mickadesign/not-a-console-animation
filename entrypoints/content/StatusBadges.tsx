@@ -7,37 +7,23 @@ interface StatusBadgesProps {
   enabled: boolean
 }
 
-export function StatusBadges({ rafIntercepted, gsapDetected, animationCount, enabled }: StatusBadgesProps) {
-  const hasAnything = rafIntercepted || gsapDetected || animationCount > 0
+export function StatusBadges({ rafIntercepted, gsapDetected, animationCount }: StatusBadgesProps) {
+  const parts: string[] = []
+  if (rafIntercepted) parts.push('rAF')
+  if (gsapDetected) parts.push('GSAP')
+  if (animationCount > 0) parts.push(`${animationCount} WAAPI`)
 
-  if (!hasAnything) {
-    return (
-      <div className="badges">
-        <span className="badge badge-inactive">No animations detected</span>
-      </div>
-    )
-  }
+  if (parts.length === 0) return null
 
   return (
-    <div className="badges">
-      {rafIntercepted && (
-        <span className="badge badge-raf" title="requestAnimationFrame is intercepted">
-          ⚡ rAF
-        </span>
-      )}
-      {gsapDetected && (
-        <span className="badge badge-gsap" title="GSAP global timeline detected">
-          ✓ GSAP
-        </span>
-      )}
-      {animationCount > 0 && (
-        <span
-          className="badge badge-waapi"
-          title={`${animationCount} Web Animation${animationCount !== 1 ? 's' : ''} active`}
-        >
-          {animationCount} WAAPI
-        </span>
-      )}
+    <div
+      style={{
+        fontSize: 11,
+        color: 'var(--toolbar-muted)',
+        letterSpacing: '0.02em',
+      }}
+    >
+      {parts.join(' · ')}
     </div>
   )
 }

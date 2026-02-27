@@ -16,24 +16,9 @@
   --toolbar-muted:       #737373;
   --toolbar-border:      #e5e5e5;
   --toolbar-shadow:      0 4px 20px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04);
-  --toolbar-active-border: rgba(108, 99, 255, 0.3);
-  --toolbar-active-shadow: 0 4px 20px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04);
   --toolbar-pill-sel:    rgba(212, 212, 212, 0.5);
   --toolbar-pill-hover:  rgba(229, 229, 229, 0.6);
   --toolbar-track-off:   #e5e5e5;
-
-  --badge-raf-bg:        #f0fbf6;
-  --badge-raf-fg:        #1a8a5a;
-  --badge-raf-border:    #c5ebd7;
-  --badge-gsap-bg:       #f3f0ff;
-  --badge-gsap-fg:       #5b4fcf;
-  --badge-gsap-border:   #d4ceff;
-  --badge-waapi-bg:      #fdf8ec;
-  --badge-waapi-fg:      #a0740a;
-  --badge-waapi-border:  #f0dcac;
-  --badge-off-bg:        #f5f5f5;
-  --badge-off-fg:        #bbbbbb;
-  --badge-off-border:    #e8e8e8;
 }
 
 /* ── Dark theme: OS preference (applies when page gives no signal) ── */
@@ -47,24 +32,9 @@
     --toolbar-muted:       #a3a3a3;
     --toolbar-border:      #404040;
     --toolbar-shadow:      0 4px 20px rgba(0, 0, 0, 0.4), 0 1px 4px rgba(0, 0, 0, 0.2);
-    --toolbar-active-border: rgba(108, 99, 255, 0.5);
-    --toolbar-active-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), 0 1px 4px rgba(0, 0, 0, 0.2);
     --toolbar-pill-sel:    rgba(82, 82, 82, 0.4);
     --toolbar-pill-hover:  rgba(82, 82, 82, 0.3);
     --toolbar-track-off:   #525252;
-
-    --badge-raf-bg:        #0f2820;
-    --badge-raf-fg:        #4ecba0;
-    --badge-raf-border:    #1a4035;
-    --badge-gsap-bg:       #1a1230;
-    --badge-gsap-fg:       #8899ff;
-    --badge-gsap-border:   #2a1f50;
-    --badge-waapi-bg:      #201a0a;
-    --badge-waapi-fg:      #d4a640;
-    --badge-waapi-border:  #3a2f10;
-    --badge-off-bg:        #262626;
-    --badge-off-fg:        #525252;
-    --badge-off-border:    #404040;
   }
 }
 
@@ -78,24 +48,9 @@
   --toolbar-muted:       #a3a3a3;
   --toolbar-border:      #404040;
   --toolbar-shadow:      0 4px 20px rgba(0, 0, 0, 0.4), 0 1px 4px rgba(0, 0, 0, 0.2);
-  --toolbar-active-border: rgba(108, 99, 255, 0.5);
-  --toolbar-active-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), 0 1px 4px rgba(0, 0, 0, 0.2);
   --toolbar-pill-sel:    rgba(108, 99, 255, 0.2);
   --toolbar-pill-hover:  rgba(255, 255, 255, 0.06);
   --toolbar-track-off:   #525252;
-
-  --badge-raf-bg:        #0f2820;
-  --badge-raf-fg:        #4ecba0;
-  --badge-raf-border:    #1a4035;
-  --badge-gsap-bg:       #1a1230;
-  --badge-gsap-fg:       #8899ff;
-  --badge-gsap-border:   #2a1f50;
-  --badge-waapi-bg:      #201a0a;
-  --badge-waapi-fg:      #d4a640;
-  --badge-waapi-border:  #3a2f10;
-  --badge-off-bg:        #262626;
-  --badge-off-fg:        #525252;
-  --badge-off-border:    #404040;
 }
 
 /* ── Light theme: explicit page signal (overrides OS dark preference) ── */
@@ -108,24 +63,9 @@
   --toolbar-muted:       #737373;
   --toolbar-border:      #e5e5e5;
   --toolbar-shadow:      0 4px 20px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04);
-  --toolbar-active-border: rgba(108, 99, 255, 0.3);
-  --toolbar-active-shadow: 0 4px 20px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04);
   --toolbar-pill-sel:    rgba(212, 212, 212, 0.5);
   --toolbar-pill-hover:  rgba(229, 229, 229, 0.6);
   --toolbar-track-off:   #e5e5e5;
-
-  --badge-raf-bg:        #f0fbf6;
-  --badge-raf-fg:        #1a8a5a;
-  --badge-raf-border:    #c5ebd7;
-  --badge-gsap-bg:       #f3f0ff;
-  --badge-gsap-fg:       #5b4fcf;
-  --badge-gsap-border:   #d4ceff;
-  --badge-waapi-bg:      #fdf8ec;
-  --badge-waapi-fg:      #a0740a;
-  --badge-waapi-border:  #f0dcac;
-  --badge-off-bg:        #f5f5f5;
-  --badge-off-fg:        #bbbbbb;
-  --badge-off-border:    #e8e8e8;
 }
 
 /* ── Toolbar shell ─────────────────────────────────────────────────── */
@@ -169,46 +109,4 @@
   color: var(--toolbar-fg);
   flex: 1;
   pointer-events: none;
-}
-
-
-/* ── Status badges ─────────────────────────────────────────────────── */
-
-.badges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  min-height: 18px;
-}
-
-.badge {
-  font-size: 10px;
-  padding: 2px 7px;
-  border-radius: 4px;
-  font-weight: 500;
-  letter-spacing: 0.1px;
-}
-
-.badge-raf {
-  background: var(--badge-raf-bg);
-  color: var(--badge-raf-fg);
-  border: 1px solid var(--badge-raf-border);
-}
-
-.badge-gsap {
-  background: var(--badge-gsap-bg);
-  color: var(--badge-gsap-fg);
-  border: 1px solid var(--badge-gsap-border);
-}
-
-.badge-waapi {
-  background: var(--badge-waapi-bg);
-  color: var(--badge-waapi-fg);
-  border: 1px solid var(--badge-waapi-border);
-}
-
-.badge-inactive {
-  background: var(--badge-off-bg);
-  color: var(--badge-off-fg);
-  border: 1px solid var(--badge-off-border);
 }
