@@ -68,11 +68,14 @@ export function AnimHistory({ groups, openId, onOpenChange, onClear }: AnimHisto
               <span className="history-item-title">{getGroupTitle(group)}</span>
               <motion.span
                 className="history-item-chevron"
-                animate={{ rotate: isOpen ? 180 : 0 }}
+                animate={{ rotate: isOpen ? 90 : 0 }}
                 transition={{ duration: 0.15, ease: 'easeInOut' }}
-                style={{ display: 'inline-block', originY: '50%' }}
+                style={{ display: 'inline-flex', transformOrigin: '50% 50%' }}
+                aria-hidden="true"
               >
-                ↓
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="9 6 15 12 9 18" />
+                </svg>
               </motion.span>
             </button>
 
