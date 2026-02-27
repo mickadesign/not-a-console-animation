@@ -18,7 +18,7 @@ export function StatusBadges({ rafIntercepted, gsapDetected, animationCount }: S
   return (
     <div
       style={{
-        fontSize: 11,
+        fontSize: 13,
         color: 'var(--toolbar-muted)',
         letterSpacing: '0.02em',
       }}
