@@ -153,6 +153,26 @@ export default defineContentScript({
       if (message?.type === 'TOGGLE_TOOLBAR') toggleToolbar()
     })
 
+    // ── Theme detection ────────────────────────────────────────────────
+    // Page dark class takes priority; OS preference is the CSS fallback.
+    function syncTheme(): void {
+      const html = document.documentElement
+      if (html.classList.contains('dark')) {
+        hostEl.setAttribute('data-theme', 'dark')
+      } else if (html.classList.contains('light')) {
+        hostEl.setAttribute('data-theme', 'light')
+      } else {
+        hostEl.removeAttribute('data-theme')
+      }
+    }
+
+    syncTheme()
+    const themeObserver = new MutationObserver(syncTheme)
+    themeObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class'],
+    })
+
     // Mount the UI element into the DOM
     ui.mount()
   },

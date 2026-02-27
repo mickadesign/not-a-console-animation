@@ -55,7 +55,7 @@ const Switch = forwardRef<HTMLButtonElement, SwitchProps>(
             width: TRACK_WIDTH,
             height: TRACK_HEIGHT,
             borderRadius: TRACK_HEIGHT / 2,
-            background: checked ? '#6B97FF' : '#dddddd',
+            background: checked ? '#6B97FF' : 'var(--toolbar-track-off)',
             transition: 'background 80ms',
             flexShrink: 0,
           }}
@@ -86,7 +86,7 @@ const Switch = forwardRef<HTMLButtonElement, SwitchProps>(
           <span
             style={{
               fontSize: 13,
-              color: checked ? '#111111' : '#aaaaaa',
+              color: checked ? 'var(--toolbar-fg)' : 'var(--toolbar-muted)',
               transition: 'color 80ms',
               fontFamily: 'inherit',
             }}

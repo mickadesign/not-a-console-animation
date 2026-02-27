@@ -155,7 +155,7 @@ const SubtleTab = forwardRef<HTMLDivElement, SubtleTabProps>(
               style={{
                 position: 'absolute',
                 borderRadius: 9999,
-                background: 'rgba(108, 99, 255, 0.1)',
+                background: 'var(--toolbar-pill-sel)',
                 pointerEvents: 'none',
               }}
               initial={false}
@@ -180,7 +180,7 @@ const SubtleTab = forwardRef<HTMLDivElement, SubtleTabProps>(
                 style={{
                   position: 'absolute',
                   borderRadius: 9999,
-                  background: 'rgba(0, 0, 0, 0.04)',
+                  background: 'var(--toolbar-pill-hover)',
                   pointerEvents: 'none',
                 }}
                 initial={{
@@ -308,7 +308,7 @@ const SubtleTabItem = forwardRef<HTMLButtonElement, SubtleTabItemProps>(
             size={14}
             strokeWidth={isActive ? 2 : 1.5}
             style={{
-              color: isActive ? '#111111' : '#aaaaaa',
+              color: isActive ? 'var(--toolbar-fg)' : 'var(--toolbar-muted)',
               transition: 'color 80ms',
               flexShrink: 0,
             }}
@@ -337,7 +337,7 @@ const SubtleTabItem = forwardRef<HTMLButtonElement, SubtleTabItemProps>(
             style={{
               gridColumn: '1',
               gridRow: '1',
-              color: isActive ? '#111111' : '#aaaaaa',
+              color: isActive ? 'var(--toolbar-fg)' : 'var(--toolbar-muted)',
               fontVariationSettings:
                 selectedIndex === index ? fontWeights.semibold : fontWeights.normal,
               transition: 'color 80ms, font-variation-settings 80ms',

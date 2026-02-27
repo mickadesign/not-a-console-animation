@@ -116,7 +116,6 @@ export function Toolbar({ onSpeedChange, onStateChange, initialEnabled = false, 
         onPointerUp={onPointerUp}
       >
         <span className="logo">SlowMo</span>
-        {!enabled && <span className="hint">activate before interacting</span>}
         <Switch
           checked={enabled}
           onToggle={handleToggle}
