@@ -5,6 +5,9 @@ import { StatusBadges } from './StatusBadges'
 
 interface ToolbarProps {
   onSpeedChange: (speed: SlowMoSpeed | null) => void
+  onStateChange?: (state: { enabled: boolean; speed: SlowMoSpeed }) => void
+  initialEnabled?: boolean
+  initialSpeed?: SlowMoSpeed
 }
 
 interface Status {
@@ -13,9 +16,9 @@ interface Status {
   animationCount: number
 }
 
-export function Toolbar({ onSpeedChange }: ToolbarProps) {
-  const [enabled, setEnabled] = useState(true)
-  const [speed, setSpeed] = useState<SlowMoSpeed>(0.25)
+export function Toolbar({ onSpeedChange, onStateChange, initialEnabled = false, initialSpeed = 0.25 }: ToolbarProps) {
+  const [enabled, setEnabled] = useState(initialEnabled)
+  const [speed, setSpeed] = useState<SlowMoSpeed>(initialSpeed)
   const [status, setStatus] = useState<Status>({
     rafIntercepted: false,
     gsapDetected: false,
@@ -47,10 +50,11 @@ export function Toolbar({ onSpeedChange }: ToolbarProps) {
     return () => clearInterval(interval)
   }, [enabled])
 
-  // Notify parent of current effective speed whenever state changes
+  // Notify parent of current effective speed and full state whenever they change
   useEffect(() => {
     onSpeedChange(enabled ? speed : null)
-  }, [enabled, speed, onSpeedChange])
+    onStateChange?.({ enabled, speed })
+  }, [enabled, speed, onSpeedChange, onStateChange])
 
   const handleToggle = useCallback(() => {
     setEnabled((prev) => !prev)

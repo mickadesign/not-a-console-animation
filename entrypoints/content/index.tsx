@@ -12,6 +12,7 @@ import { applyWAAPI, resetWAAPI, countWAAPI, setObserverEnabled, startWAAPIObser
 import { applyGSAP, resetGSAP, startGSAPPolling } from './gsap'
 import { sendSetSpeed, readToken } from './bridge'
 import { Toolbar } from './Toolbar'
+import { readSessionState, writeSessionState } from './session-store'
 import toolbarStyles from './toolbar.css?inline'
 
 export default defineContentScript({
@@ -23,20 +24,18 @@ export default defineContentScript({
     // Top-frame only — prevent duplicate toolbars inside iframes
     if (window !== window.top) return
 
-    // ── State ──────────────────────────────────────────────────────────
-    let visible = false
-    let currentSpeed: SlowMoSpeed | null = null // null = disabled (1x)
+    // ── Restore persisted session state ───────────────────────────────
+    const stored = await readSessionState()
+    let visible            = stored?.visible ?? false
+    let currentSpeed: SlowMoSpeed | null = stored?.enabled ? (stored.speed ?? 0.25) : null
+    let persistedSpeed: SlowMoSpeed      = stored?.speed   ?? 0.25
     let gsapDetected = false
 
     // ── Read inject.ts status synchronously ───────────────────────────
-    // inject.ts exposed the token + initial GSAP detection as window properties
-    // at document_start. Safer than waiting for a postMessage that may have
-    // already fired before our listener was attached.
     const rafIntercepted = !!(window as any).__slowmoToken
     const initialGSAPDetected = typeof (window as any).gsap !== 'undefined'
     gsapDetected = initialGSAPDetected
 
-    // Relay initial GSAP detection to the toolbar via CustomEvent
     dispatchStatusEvent({ rafIntercepted, gsapDetected, animationCount: countWAAPI() })
 
     // ── Layer coordination ─────────────────────────────────────────────
@@ -73,10 +72,7 @@ export default defineContentScript({
         if (detected) {
           gsapDetected = true
           dispatchStatusEvent({ gsapDetected: true })
-          // Apply current speed to GSAP now that it's loaded
-          if (currentSpeed !== null) {
-            applyGSAP(currentSpeed)
-          }
+          if (currentSpeed !== null) applyGSAP(currentSpeed)
         }
       })
     }
@@ -89,8 +85,6 @@ export default defineContentScript({
       if (e.source !== window) return
       const d = e.data
       if (!d || d.tag !== SLOWMO_TAG || d.type !== 'SLOWMO_STATUS_REPORT') return
-      // Token already set on window — no need to re-read.
-      // Update GSAP detection if inject.ts now sees it.
       if (d.gsapDetected && !gsapDetected) {
         gsapDetected = true
         dispatchStatusEvent({ gsapDetected: true })
@@ -103,7 +97,6 @@ export default defineContentScript({
       position: 'overlay',
       zIndex: 2147483647,
       onMount(container, shadow) {
-        // Inject toolbar styles into the shadow root (isolated from page CSS)
         const style = document.createElement('style')
         style.textContent = toolbarStyles
         shadow.prepend(style)
@@ -111,11 +104,16 @@ export default defineContentScript({
         const root = createRoot(container)
         root.render(
           <Toolbar
+            initialEnabled={stored?.enabled ?? false}
+            initialSpeed={stored?.speed ?? 0.25}
             onSpeedChange={(speed) => {
               currentSpeed = speed
               applyAllLayers(speed)
-              // Update WAAPI count badge when speed changes
               dispatchStatusEvent({ animationCount: countWAAPI() })
+            }}
+            onStateChange={({ enabled, speed }) => {
+              persistedSpeed = speed
+              writeSessionState({ visible, enabled, speed })
             }}
           />
         )
@@ -126,17 +124,21 @@ export default defineContentScript({
       },
     })
 
-    // Start hidden — toolbar only appears on icon click / hotkey
+    // Apply layers immediately if the session had slow-mo enabled
+    if (currentSpeed !== null) {
+      applyAllLayers(currentSpeed)
+    }
+
+    // Show or hide based on restored visibility
     const hostEl = ui.shadowHost as HTMLElement
-    hostEl.style.display = 'none'
+    hostEl.style.display = visible ? '' : 'none'
 
     // ── Toggle toolbar visibility ──────────────────────────────────────
     function toggleToolbar(): void {
       visible = !visible
       hostEl.style.display = visible ? '' : 'none'
+      writeSessionState({ visible, enabled: currentSpeed !== null, speed: persistedSpeed })
       if (visible) {
-        ui.mount()
-        // Immediately apply current layers when showing
         dispatchStatusEvent({
           rafIntercepted: !!(window as any).__slowmoToken,
           gsapDetected,
@@ -147,12 +149,10 @@ export default defineContentScript({
 
     // Listen for toggle commands from background SW
     chrome.runtime.onMessage.addListener((message) => {
-      if (message?.type === 'TOGGLE_TOOLBAR') {
-        toggleToolbar()
-      }
+      if (message?.type === 'TOGGLE_TOOLBAR') toggleToolbar()
     })
 
-    // Mount the UI element into the DOM now (hidden)
+    // Mount the UI element into the DOM
     ui.mount()
   },
 })
