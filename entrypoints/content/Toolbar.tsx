@@ -4,7 +4,57 @@ import { SlooowSpeed, SLOOOW_SPEEDS } from '../../src/shared/types'
 import { SubtleTab, SubtleTabItem } from './components/SubtleTab'
 import { Switch } from './components/Switch'
 import { StatusBadges } from './StatusBadges'
+import { AnimHistory, type HistoryGroup } from './components/AnimHistory'
+import { type AnimInfo } from './components/EasingPanel'
+import { parseEasing } from './lib/easing-parser'
 import { springs } from './lib/springs'
+
+// ── Animation capture helpers ─────────────────────────────────────────
+
+const KEYFRAME_META = new Set(['offset', 'computedOffset', 'easing', 'composite'])
+
+function extractProperties(effect: KeyframeEffect): string[] {
+  try {
+    const props = new Set<string>()
+    for (const kf of effect.getKeyframes()) {
+      for (const key of Object.keys(kf)) {
+        if (!KEYFRAME_META.has(key)) props.add(key)
+      }
+    }
+    return Array.from(props)
+  } catch {
+    return []
+  }
+}
+
+function extractAnimInfo(anim: Animation): AnimInfo | null {
+  const effect = anim.effect
+  if (!(effect instanceof KeyframeEffect)) return null
+  const timing     = effect.getTiming()
+  const rawEasing  = timing.easing ?? 'ease'
+  const rawDuration = timing.duration
+  const duration: number | 'auto' = typeof rawDuration === 'number' ? rawDuration : 'auto'
+  const delay      = typeof timing.delay === 'number' ? timing.delay : 0
+  const properties = extractProperties(effect)
+  return { rawEasing, easing: parseEasing(rawEasing), duration, delay, properties }
+}
+
+function collectAnimations(target: Element): AnimInfo[] {
+  const seen   = new Set<Animation>()
+  const result: AnimInfo[] = []
+  let el: Element | null = target
+  for (let depth = 0; depth < 5 && el; depth++, el = el.parentElement) {
+    for (const anim of el.getAnimations()) {
+      if (seen.has(anim)) continue
+      seen.add(anim)
+      const info = extractAnimInfo(anim)
+      if (info) result.push(info)
+    }
+  }
+  return result
+}
+
+// ─────────────────────────────────────────────────────────────────────
 
 interface ToolbarProps {
   onSpeedChange: (speed: SlooowSpeed | null) => void
@@ -21,16 +71,21 @@ interface Status {
 
 export function Toolbar({ onSpeedChange, onStateChange, initialEnabled = false, initialSpeed = 0.25 }: ToolbarProps) {
   const [enabled, setEnabled] = useState(initialEnabled)
-  const [speed, setSpeed] = useState<SlooowSpeed>(initialSpeed)
-  const [status, setStatus] = useState<Status>({
+  const [speed, setSpeed]     = useState<SlooowSpeed>(initialSpeed)
+  const [status, setStatus]   = useState<Status>({
     rafIntercepted: false,
     gsapDetected: false,
     animationCount: 0,
   })
 
-  // Drag state — stored in refs so pointer handlers don't need re-registration
+  // History ring — persists across enable/disable cycles, max 10 entries
+  const [historyGroups, setHistoryGroups] = useState<HistoryGroup[]>([])
+  const [openGroupId, setOpenGroupId]     = useState<number | null>(null)
+  const historyIdRef = useRef(0)
+
+  // Drag state
   const [position, setPosition] = useState<{ top: number; right: number }>({ top: 16, right: 16 })
-  const dragging = useRef(false)
+  const dragging  = useRef(false)
   const dragStart = useRef({ x: 0, y: 0, top: 16, right: 16 })
   const toolbarRef = useRef<HTMLDivElement>(null)
 
@@ -60,6 +115,42 @@ export function Toolbar({ onSpeedChange, onStateChange, initialEnabled = false, 
     return () => clearInterval(interval)
   }, [enabled])
 
+  // History capture — debounced pointermove, only while enabled
+  // Pointer settling on a new element for 80 ms triggers a snapshot.
+  useEffect(() => {
+    if (!enabled) return
+
+    let lastTarget: Element | null = null
+    let captureTimer: ReturnType<typeof setTimeout> | null = null
+
+    const handlePointerMove = (e: PointerEvent) => {
+      const target = e.target as Element | null
+      if (!target || target === lastTarget) return
+      lastTarget = target
+
+      if (captureTimer) clearTimeout(captureTimer)
+      captureTimer = setTimeout(() => {
+        captureTimer = null
+        const current = lastTarget
+        if (!current) return
+
+        const anims = collectAnimations(current)
+        if (!anims.length) return
+
+        const id    = ++historyIdRef.current
+        const group: HistoryGroup = { id, anims }
+        setHistoryGroups(prev => [group, ...prev].slice(0, 10))
+        setOpenGroupId(id)
+      }, 80)
+    }
+
+    document.addEventListener('pointermove', handlePointerMove, { passive: true })
+    return () => {
+      document.removeEventListener('pointermove', handlePointerMove)
+      if (captureTimer) clearTimeout(captureTimer)
+    }
+  }, [enabled])
+
   // Notify parent of current effective speed and full state whenever they change
   useEffect(() => {
     onSpeedChange(enabled ? speed : null)
@@ -72,20 +163,14 @@ export function Toolbar({ onSpeedChange, onStateChange, initialEnabled = false, 
 
   const handleSpeedSelect = useCallback((newSpeed: SlooowSpeed) => {
     setSpeed(newSpeed)
-    if (!enabled) setEnabled(true) // selecting a speed implicitly enables
+    if (!enabled) setEnabled(true)
   }, [enabled])
 
-  // Pointer-based drag (works for mouse and touch)
+  // Pointer-based drag
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    // Only drag from the header, not from buttons or their children
     if ((e.target as HTMLElement).closest('button')) return
     dragging.current = true
-    dragStart.current = {
-      x: e.clientX,
-      y: e.clientY,
-      top: position.top,
-      right: position.right,
-    }
+    dragStart.current = { x: e.clientX, y: e.clientY, top: position.top, right: position.right }
     ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
     e.preventDefault()
   }
@@ -96,13 +181,11 @@ export function Toolbar({ onSpeedChange, onStateChange, initialEnabled = false, 
     const dy = e.clientY - dragStart.current.y
     setPosition({
       right: Math.max(0, dragStart.current.right - dx),
-      top: Math.max(0, dragStart.current.top + dy),
+      top:   Math.max(0, dragStart.current.top   + dy),
     })
   }
 
-  const onPointerUp = () => {
-    dragging.current = false
-  }
+  const onPointerUp = () => { dragging.current = false }
 
   return (
     <div
@@ -110,7 +193,7 @@ export function Toolbar({ onSpeedChange, onStateChange, initialEnabled = false, 
       className="toolbar"
       style={{ top: position.top, right: position.right }}
     >
-      {/* Drag handle doubles as header row */}
+      {/* Drag handle / header row */}
       <div
         className="header"
         onPointerDown={onPointerDown}
@@ -138,7 +221,6 @@ export function Toolbar({ onSpeedChange, onStateChange, initialEnabled = false, 
             }}
             style={{ overflow: 'hidden' }}
           >
-            {/* Inner div provides spacing — padding is clipped when height is 0 */}
             <div style={{ paddingTop: 9 }}>
               <SubtleTab
                 selectedIndex={SLOOOW_SPEEDS.indexOf(speed)}
@@ -161,6 +243,32 @@ export function Toolbar({ onSpeedChange, onStateChange, initialEnabled = false, 
                 enabled={enabled}
               />
             </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Captured easing history — persists across enable/disable, max 10 entries */}
+      <AnimatePresence initial={false}>
+        {historyGroups.length > 0 && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{
+              height: springs.moderate,
+              opacity: { type: 'tween', duration: 0.15, ease: 'easeInOut' },
+            }}
+            style={{ overflow: 'hidden' }}
+          >
+            <AnimHistory
+              groups={historyGroups}
+              openId={openGroupId}
+              onOpenChange={setOpenGroupId}
+              onClear={() => {
+                setHistoryGroups([])
+                setOpenGroupId(null)
+              }}
+            />
           </motion.div>
         )}
       </AnimatePresence>

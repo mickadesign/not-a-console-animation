@@ -19,6 +19,8 @@
   --toolbar-pill-sel:    rgba(212, 212, 212, 0.5);
   --toolbar-pill-hover:  rgba(229, 229, 229, 0.6);
   --toolbar-track-off:   #e5e5e5;
+  --toolbar-curve-bg:    #f0f0f0;
+  --toolbar-curve-line:  #525252;
 }
 
 /* ── Dark theme: OS preference (applies when page gives no signal) ── */
@@ -35,6 +37,8 @@
     --toolbar-pill-sel:    rgba(82, 82, 82, 0.4);
     --toolbar-pill-hover:  rgba(82, 82, 82, 0.3);
     --toolbar-track-off:   #525252;
+    --toolbar-curve-bg:    #262626;
+    --toolbar-curve-line:  #a3a3a3;
   }
 }
 
@@ -51,6 +55,8 @@
   --toolbar-pill-sel:    rgba(108, 99, 255, 0.2);
   --toolbar-pill-hover:  rgba(255, 255, 255, 0.06);
   --toolbar-track-off:   #525252;
+  --toolbar-curve-bg:    #262626;
+  --toolbar-curve-line:  #a3a3a3;
 }
 
 /* ── Light theme: explicit page signal (overrides OS dark preference) ── */
@@ -102,10 +108,177 @@
 }
 
 .logo {
-  font-weight: 700;
-  font-size: 16px;
-  letter-spacing: -0.2px;
+  font-weight: 500;
+  font-size: 14px;
   color: var(--toolbar-fg);
   flex: 1;
   pointer-events: none;
+}
+
+/* ── Easing inspector panel ────────────────────────────────────────── */
+
+.easing-panel {
+  padding-top: 8px;
+  margin-top: 2px;
+  border-top: 1px solid var(--toolbar-border);
+}
+
+/* When rendered inside an accordion item — no separator, tighter top spacing */
+.easing-panel--inset {
+  border-top: none;
+  padding-top: 4px;
+  margin-top: 0;
+  padding-bottom: 4px;
+}
+
+.easing-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.easing-nav-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0 2px;
+  font-size: 14px;
+  line-height: 1;
+  color: var(--toolbar-fg);
+  font-family: inherit;
+  opacity: 0.6;
+  transition: opacity 0.1s;
+}
+
+.easing-nav-btn:hover:not(:disabled) {
+  opacity: 1;
+}
+
+.easing-nav-btn:disabled {
+  opacity: 0.2;
+  cursor: default;
+}
+
+.easing-nav-count {
+  font-size: 12px;
+  color: var(--toolbar-muted);
+}
+
+.easing-curve-bg {
+  background: var(--toolbar-curve-bg);
+  border-radius: 8px;
+  overflow: hidden;
+  color: var(--toolbar-curve-line);
+  margin-bottom: 7px;
+}
+
+.easing-meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  padding-bottom: 2px;
+}
+
+.easing-value {
+  font-family: 'SF Mono', 'Fira Code', ui-monospace, monospace;
+  font-size: 12px;
+  color: var(--toolbar-fg);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.easing-timing {
+  font-size: 12px;
+  color: var(--toolbar-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ── Animation history accordion ───────────────────────────────────── */
+
+.anim-history {
+  padding-top: 8px;
+  margin-top: 2px;
+  border-top: 1px solid var(--toolbar-border);
+  padding-bottom: 2px;
+}
+
+.anim-history-hd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+  padding: 0 2px;
+}
+
+.anim-history-label {
+  font-size: 11px;
+  color: var(--toolbar-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.anim-history-clear {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 11px;
+  color: var(--toolbar-muted);
+  font-family: inherit;
+  padding: 0;
+  transition: color 0.1s;
+}
+
+.anim-history-clear:hover {
+  color: var(--toolbar-fg);
+}
+
+.history-item {
+  margin-bottom: 1px;
+}
+
+.history-item-hd {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px 6px;
+  border-radius: 6px;
+  font-family: inherit;
+  text-align: left;
+  transition: background 0.1s;
+}
+
+.history-item-hd:hover {
+  background: var(--toolbar-pill-hover);
+}
+
+.history-item-hd.is-open {
+  background: var(--toolbar-pill-sel);
+}
+
+.history-item-title {
+  font-family: 'SF Mono', 'Fira Code', ui-monospace, monospace;
+  font-size: 11px;
+  color: var(--toolbar-fg);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+  flex: 1;
+}
+
+.history-item-chevron {
+  font-size: 12px;
+  color: var(--toolbar-muted);
+  flex-shrink: 0;
+  line-height: 1;
 }
