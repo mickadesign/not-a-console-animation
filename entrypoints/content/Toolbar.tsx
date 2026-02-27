@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
-import { SlowMoSpeed } from '../../src/shared/types'
-import { SpeedSelector } from './SpeedSelector'
+import { SlowMoSpeed, SLOWMO_SPEEDS } from '../../src/shared/types'
+import { SubtleTab, SubtleTabItem } from './components/SubtleTab'
+import { Switch } from './components/Switch'
 import { StatusBadges } from './StatusBadges'
 
 interface ToolbarProps {
@@ -26,9 +27,9 @@ export function Toolbar({ onSpeedChange, onStateChange, initialEnabled = false, 
   })
 
   // Drag state — stored in refs so pointer handlers don't need re-registration
-  const [position, setPosition] = useState<{ bottom: number; right: number }>({ bottom: 20, right: 20 })
+  const [position, setPosition] = useState<{ top: number; right: number }>({ top: 16, right: 16 })
   const dragging = useRef(false)
-  const dragStart = useRef({ x: 0, y: 0, bottom: 20, right: 20 })
+  const dragStart = useRef({ x: 0, y: 0, top: 16, right: 16 })
   const toolbarRef = useRef<HTMLDivElement>(null)
 
   // Listen for status updates relayed from inject.ts via CustomEvent
@@ -39,6 +40,13 @@ export function Toolbar({ onSpeedChange, onStateChange, initialEnabled = false, 
     }
     document.addEventListener('slowmo:status', handler)
     return () => document.removeEventListener('slowmo:status', handler)
+  }, [])
+
+  // Enable slow-mo whenever the toolbar is shown via the extension icon
+  useEffect(() => {
+    const handler = () => setEnabled(true)
+    document.addEventListener('slowmo:set-enabled', handler)
+    return () => document.removeEventListener('slowmo:set-enabled', handler)
   }, [])
 
   // Refresh WAAPI animation count every second while enabled
@@ -67,13 +75,13 @@ export function Toolbar({ onSpeedChange, onStateChange, initialEnabled = false, 
 
   // Pointer-based drag (works for mouse and touch)
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    // Only drag from the header, not from buttons
-    if ((e.target as HTMLElement).tagName === 'BUTTON') return
+    // Only drag from the header, not from buttons or their children
+    if ((e.target as HTMLElement).closest('button')) return
     dragging.current = true
     dragStart.current = {
       x: e.clientX,
       y: e.clientY,
-      bottom: position.bottom,
+      top: position.top,
       right: position.right,
     }
     ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
@@ -86,7 +94,7 @@ export function Toolbar({ onSpeedChange, onStateChange, initialEnabled = false, 
     const dy = e.clientY - dragStart.current.y
     setPosition({
       right: Math.max(0, dragStart.current.right - dx),
-      bottom: Math.max(0, dragStart.current.bottom - dy),
+      top: Math.max(0, dragStart.current.top + dy),
     })
   }
 
@@ -98,7 +106,7 @@ export function Toolbar({ onSpeedChange, onStateChange, initialEnabled = false, 
     <div
       ref={toolbarRef}
       className={`toolbar${enabled ? ' active' : ''}`}
-      style={{ bottom: position.bottom, right: position.right }}
+      style={{ top: position.top, right: position.right }}
     >
       {/* Drag handle doubles as header row */}
       <div
@@ -109,20 +117,26 @@ export function Toolbar({ onSpeedChange, onStateChange, initialEnabled = false, 
       >
         <span className="logo">SlowMo</span>
         {!enabled && <span className="hint">activate before interacting</span>}
-        <button
-          className={`toggle ${enabled ? 'on' : 'off'}`}
-          onClick={handleToggle}
+        <Switch
+          checked={enabled}
+          onToggle={handleToggle}
           title={enabled ? 'Click to disable slow-mo' : 'Click to enable slow-mo'}
-        >
-          {enabled ? 'ON' : 'OFF'}
-        </button>
+        />
       </div>
 
-      <SpeedSelector
-        currentSpeed={speed}
-        enabled={enabled}
-        onSelect={handleSpeedSelect}
-      />
+      <SubtleTab
+        selectedIndex={SLOWMO_SPEEDS.indexOf(speed)}
+        onSelect={(idx) => handleSpeedSelect(SLOWMO_SPEEDS[idx])}
+        style={{ marginBottom: 8 }}
+      >
+        {SLOWMO_SPEEDS.map((s, idx) => (
+          <SubtleTabItem
+            key={s}
+            index={idx}
+            label={s === 1 ? '1×' : `${s}×`}
+          />
+        ))}
+      </SubtleTab>
 
       <StatusBadges
         rafIntercepted={status.rafIntercepted}

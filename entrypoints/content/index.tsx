@@ -139,6 +139,7 @@ export default defineContentScript({
       hostEl.style.display = visible ? '' : 'none'
       writeSessionState({ visible, enabled: currentSpeed !== null, speed: persistedSpeed })
       if (visible) {
+        document.dispatchEvent(new CustomEvent('slowmo:set-enabled', { detail: { enabled: true } }))
         dispatchStatusEvent({
           rafIntercepted: !!(window as any).__slowmoToken,
           gsapDetected,
