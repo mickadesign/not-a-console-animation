@@ -17,22 +17,24 @@ interface EasingPanelProps {
 }
 
 // ── SVG canvas geometry ───────────────────────────────────────────────
-// viewBox: 0 0 W TOTAL_H  (W=100, H=60 is the 0–1 range, PAD=8 on each side)
+// viewBox: 0 0 (W+2*HPAD) (H+2*PAD)
+// HPAD adds horizontal breathing room so anchors don't touch the edges.
 // preserveAspectRatio="none" fills the container without letterboxing.
-const W   = 100
-const H   = 60
-const PAD = 8
+const W    = 100
+const H    = 60
+const PAD  = 8   // vertical padding (top / bottom)
+const HPAD = 10  // horizontal padding (left / right)
 
 function svgY(v: number) { return PAD + H * (1 - v) }
-function svgX(p: number) { return p * W }
+function svgX(p: number) { return HPAD + p * W }
 
 function buildPath(easing: ParsedEasing): string {
   switch (easing.type) {
     case 'cubic-bezier': {
       const { x1, y1, x2, y2 } = easing
       return (
-        `M 0,${svgY(0)} ` +
-        `C ${svgX(x1)},${svgY(y1)} ${svgX(x2)},${svgY(y2)} ${W},${svgY(1)}`
+        `M ${svgX(0)},${svgY(0)} ` +
+        `C ${svgX(x1)},${svgY(y1)} ${svgX(x2)},${svgY(y2)} ${svgX(1)},${svgY(1)}`
       )
     }
 
@@ -47,7 +49,7 @@ function buildPath(easing: ParsedEasing): string {
       const { count, direction } = easing
       const isStart = direction === 'start' || direction === 'both'
       if (isStart) {
-        let d = `M 0,${svgY(1 / count)}`
+        let d = `M ${svgX(0)},${svgY(1 / count)}`
         for (let i = 0; i < count; i++) {
           const xNext = svgX((i + 1) / count)
           d += ` H ${xNext}`
@@ -55,7 +57,7 @@ function buildPath(easing: ParsedEasing): string {
         }
         return d
       } else {
-        let d = `M 0,${svgY(0)}`
+        let d = `M ${svgX(0)},${svgY(0)}`
         for (let i = 0; i < count; i++) {
           d += ` H ${svgX((i + 1) / count)} V ${svgY((i + 1) / count)}`
         }
@@ -64,7 +66,7 @@ function buildPath(easing: ParsedEasing): string {
     }
 
     default:
-      return `M 0,${svgY(0)} L ${W},${svgY(1)}`
+      return `M ${svgX(0)},${svgY(0)} L ${svgX(1)},${svgY(1)}`
   }
 }
 
@@ -105,29 +107,87 @@ export function formatMs(ms: number | 'auto'): string {
   return `${sign}${parseFloat((abs / 1000).toFixed(2))}s`
 }
 
+// ── Bezier handle dots ────────────────────────────────────────────────
+// HTML divs rather than SVG circles so they stay perfectly round
+// even though the SVG uses preserveAspectRatio="none" (non-uniform scale).
+// Positions are computed as percentages matching the SVG coordinate system.
+
+function BezierDot({ x, y, size, opacity }: { x: number; y: number; size: number; opacity: number }) {
+  const left   = `${((HPAD + x * W) / (W + 2 * HPAD)) * 100}%`
+  const bottom = `${((PAD  + H * y) / (H + 2 * PAD )) * 100}%`
+  return (
+    <div
+      aria-hidden="true"
+      style={{
+        position: 'absolute',
+        left,
+        bottom,
+        transform: 'translate(-50%, 50%)',
+        width: size,
+        height: size,
+        borderRadius: '50%',
+        background: 'currentColor',
+        opacity,
+        pointerEvents: 'none',
+      }}
+    />
+  )
+}
+
 // ── SVG curve ─────────────────────────────────────────────────────────
 
 function EasingCurve({ easing }: { easing: ParsedEasing }) {
   const d = buildPath(easing)
   return (
-    <svg
-      viewBox={`0 0 ${W} ${H + PAD * 2}`}
-      preserveAspectRatio="none"
-      style={{ width: '100%', height: 90, display: 'block' }}
-      aria-hidden="true"
-    >
-      {d && (
-        <path
-          d={d}
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={1.5}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          vectorEffect="non-scaling-stroke"
-        />
+    <div style={{ position: 'relative', height: 90 }}>
+      <svg
+        viewBox={`0 0 ${W + HPAD * 2} ${H + PAD * 2}`}
+        preserveAspectRatio="none"
+        style={{ width: '100%', height: 90, display: 'block' }}
+        aria-hidden="true"
+      >
+        {/* Bezier handle lines — drawn before the curve so curve renders on top */}
+        {easing.type === 'cubic-bezier' && (
+          <>
+            <line
+              x1={svgX(0)}        y1={svgY(0)}
+              x2={svgX(easing.x1)} y2={svgY(easing.y1)}
+              stroke="currentColor" strokeWidth={1.5} opacity={0.3}
+              vectorEffect="non-scaling-stroke"
+            />
+            <line
+              x1={svgX(1)}        y1={svgY(1)}
+              x2={svgX(easing.x2)} y2={svgY(easing.y2)}
+              stroke="currentColor" strokeWidth={1.5} opacity={0.3}
+              vectorEffect="non-scaling-stroke"
+            />
+          </>
+        )}
+        {d && (
+          <path
+            d={d}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={1.5}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            vectorEffect="non-scaling-stroke"
+          />
+        )}
+      </svg>
+
+      {/* Perfectly round dots overlaid via HTML (immune to SVG aspect-ratio distortion) */}
+      {easing.type === 'cubic-bezier' && (
+        <>
+          {/* Anchor points at (0,0) and (1,1) */}
+          <BezierDot x={0} y={0} size={5} opacity={0.3} />
+          <BezierDot x={1} y={1} size={5} opacity={0.3} />
+          {/* Control points */}
+          <BezierDot x={easing.x1} y={easing.y1} size={8} opacity={0.6} />
+          <BezierDot x={easing.x2} y={easing.y2} size={8} opacity={0.6} />
+        </>
       )}
-    </svg>
+    </div>
   )
 }
 
