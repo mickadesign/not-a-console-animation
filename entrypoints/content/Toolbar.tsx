@@ -69,7 +69,9 @@ export function Toolbar({ onSpeedChange, onStateChange, initialEnabled = false, 
   // History ring — persists across enable/disable cycles, max 10 entries
   const [historyGroups, setHistoryGroups] = useState<HistoryGroup[]>([])
   const [openGroupId, setOpenGroupId]     = useState<number | null>(null)
-  const historyIdRef = useRef(0)
+  const historyIdRef     = useRef(0)
+  // Mirror of historyGroups readable synchronously inside event callbacks
+  const historyGroupsRef = useRef<HistoryGroup[]>([])
 
   // Drag state
   const [position, setPosition] = useState<{ top: number; right: number }>({ top: 16, right: 16 })
@@ -96,6 +98,10 @@ export function Toolbar({ onSpeedChange, onStateChange, initialEnabled = false, 
       return anims.map(a => `${a.properties.join(',')}|${a.duration}|${a.rawEasing}`).join(';')
     }
 
+    // Exit animation in AnimHistory is 180 ms — wait 200 ms before adding
+    // the new item so the oldest item's exit finishes first.
+    const EXIT_MS = 200
+
     function captureFromTarget(target: Element) {
       const anims = collectAnimations(target)
       if (!anims.length) return
@@ -105,7 +111,13 @@ export function Toolbar({ onSpeedChange, onStateChange, initialEnabled = false, 
       lastFp  = fp
       lastFpTs = now
       const id = ++historyIdRef.current
-      setHistoryGroups(prev => [...prev, { id, anims }].slice(-10))
+      if (historyGroupsRef.current.length >= 10) {
+        // At capacity: evict oldest first, then add new item after exit finishes
+        setHistoryGroups(prev => prev.slice(1))
+        setTimeout(() => setHistoryGroups(prev => [...prev, { id, anims }]), EXIT_MS)
+      } else {
+        setHistoryGroups(prev => [...prev, { id, anims }])
+      }
     }
 
     // Hover: capture after pointer settles on a new element for 80 ms
@@ -177,6 +189,9 @@ export function Toolbar({ onSpeedChange, onStateChange, initialEnabled = false, 
   }
 
   const onPointerUp = () => { dragging.current = false }
+
+  // Keep ref in sync so capture callbacks can read current length synchronously
+  historyGroupsRef.current = historyGroups
 
   return (
     <div
