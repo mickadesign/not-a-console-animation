@@ -1,6 +1,6 @@
 export type SlowMoSpeed = 0.1 | 0.25 | 0.5 | 1
 
-export const SLOWMO_SPEEDS: SlowMoSpeed[] = [0.1, 0.25, 0.5, 1]
+export const SLOWMO_SPEEDS: SlowMoSpeed[] = [1, 0.5, 0.25, 0.1]
 
 export const SLOWMO_TAG = '__slowmo__'
 

@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
 import { SlowMoSpeed, SLOWMO_SPEEDS } from '../../src/shared/types'
 import { SubtleTab, SubtleTabItem } from './components/SubtleTab'
 import { Switch } from './components/Switch'
 import { StatusBadges } from './StatusBadges'
+import { springs } from './lib/springs'
 
 interface ToolbarProps {
   onSpeedChange: (speed: SlowMoSpeed | null) => void
@@ -105,7 +107,7 @@ export function Toolbar({ onSpeedChange, onStateChange, initialEnabled = false, 
   return (
     <div
       ref={toolbarRef}
-      className={`toolbar${enabled ? ' active' : ''}`}
+      className="toolbar"
       style={{ top: position.top, right: position.right }}
     >
       {/* Drag handle doubles as header row */}
@@ -123,26 +125,45 @@ export function Toolbar({ onSpeedChange, onStateChange, initialEnabled = false, 
         />
       </div>
 
-      <SubtleTab
-        selectedIndex={SLOWMO_SPEEDS.indexOf(speed)}
-        onSelect={(idx) => handleSpeedSelect(SLOWMO_SPEEDS[idx])}
-        style={{ marginBottom: 8 }}
-      >
-        {SLOWMO_SPEEDS.map((s, idx) => (
-          <SubtleTabItem
-            key={s}
-            index={idx}
-            label={s === 1 ? '1×' : `${s}×`}
-          />
-        ))}
-      </SubtleTab>
+      {/* Speed selector + status — collapses when disabled */}
+      <AnimatePresence initial={false}>
+        {enabled && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{
+              height: springs.moderate,
+              opacity: { type: 'tween', duration: 0.15, ease: 'easeInOut' },
+            }}
+            style={{ overflow: 'hidden' }}
+          >
+            {/* Inner div provides spacing — padding is clipped when height is 0 */}
+            <div style={{ paddingTop: 9 }}>
+              <SubtleTab
+                selectedIndex={SLOWMO_SPEEDS.indexOf(speed)}
+                onSelect={(idx) => handleSpeedSelect(SLOWMO_SPEEDS[idx])}
+                style={{ marginBottom: 8 }}
+              >
+                {SLOWMO_SPEEDS.map((s, idx) => (
+                  <SubtleTabItem
+                    key={s}
+                    index={idx}
+                    label={s === 1 ? '1×' : `${s}×`}
+                  />
+                ))}
+              </SubtleTab>
 
-      <StatusBadges
-        rafIntercepted={status.rafIntercepted}
-        gsapDetected={status.gsapDetected}
-        animationCount={status.animationCount}
-        enabled={enabled}
-      />
+              <StatusBadges
+                rafIntercepted={status.rafIntercepted}
+                gsapDetected={status.gsapDetected}
+                animationCount={status.animationCount}
+                enabled={enabled}
+              />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
