@@ -3,7 +3,6 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { SlooowSpeed, SLOOOW_SPEEDS } from '../../src/shared/types'
 import { SubtleTab, SubtleTabItem } from './components/SubtleTab'
 import { Switch } from './components/Switch'
-import { StatusBadges } from './StatusBadges'
 import { AnimHistory, type HistoryGroup } from './components/AnimHistory'
 import { type AnimInfo } from './components/EasingPanel'
 import { parseEasing } from './lib/easing-parser'
@@ -63,20 +62,9 @@ interface ToolbarProps {
   initialSpeed?: SlooowSpeed
 }
 
-interface Status {
-  rafIntercepted: boolean
-  gsapDetected: boolean
-  animationCount: number
-}
-
 export function Toolbar({ onSpeedChange, onStateChange, initialEnabled = false, initialSpeed = 0.25 }: ToolbarProps) {
   const [enabled, setEnabled] = useState(initialEnabled)
   const [speed, setSpeed]     = useState<SlooowSpeed>(initialSpeed)
-  const [status, setStatus]   = useState<Status>({
-    rafIntercepted: false,
-    gsapDetected: false,
-    animationCount: 0,
-  })
 
   // History ring — persists across enable/disable cycles, max 10 entries
   const [historyGroups, setHistoryGroups] = useState<HistoryGroup[]>([])
@@ -89,31 +77,12 @@ export function Toolbar({ onSpeedChange, onStateChange, initialEnabled = false, 
   const dragStart = useRef({ x: 0, y: 0, top: 16, right: 16 })
   const toolbarRef = useRef<HTMLDivElement>(null)
 
-  // Listen for status updates relayed from inject.ts via CustomEvent
-  useEffect(() => {
-    const handler = (e: Event) => {
-      const detail = (e as CustomEvent<Partial<Status>>).detail
-      setStatus((prev) => ({ ...prev, ...detail }))
-    }
-    document.addEventListener('slooow:status', handler)
-    return () => document.removeEventListener('slooow:status', handler)
-  }, [])
-
   // Enable slow-mo whenever the toolbar is shown via the extension icon
   useEffect(() => {
     const handler = () => setEnabled(true)
     document.addEventListener('slooow:set-enabled', handler)
     return () => document.removeEventListener('slooow:set-enabled', handler)
   }, [])
-
-  // Refresh WAAPI animation count every second while enabled
-  useEffect(() => {
-    if (!enabled) return
-    const interval = setInterval(() => {
-      setStatus((prev) => ({ ...prev, animationCount: document.getAnimations().length }))
-    }, 1000)
-    return () => clearInterval(interval)
-  }, [enabled])
 
   // History capture — debounced pointermove, only while enabled
   // Pointer settling on a new element for 80 ms triggers a snapshot.
@@ -140,7 +109,6 @@ export function Toolbar({ onSpeedChange, onStateChange, initialEnabled = false, 
         const id    = ++historyIdRef.current
         const group: HistoryGroup = { id, anims }
         setHistoryGroups(prev => [...prev, group].slice(-10))
-        setOpenGroupId(id)
       }, 80)
     }
 
@@ -236,11 +204,6 @@ export function Toolbar({ onSpeedChange, onStateChange, initialEnabled = false, 
                 ))}
               </SubtleTab>
 
-              <StatusBadges
-                rafIntercepted={status.rafIntercepted}
-                gsapDetected={status.gsapDetected}
-                animationCount={status.animationCount}
-              />
             </div>
           </motion.div>
         )}

@@ -234,32 +234,33 @@
 
 .anim-history-hd {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   margin-bottom: 4px;
-  padding: 0 2px;
-}
-
-.anim-history-label {
-  font-size: 11px;
-  color: var(--toolbar-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
 }
 
 .anim-history-clear {
+  display: inline-flex;
+  align-items: center;
   background: none;
-  border: none;
+  border: 1px solid var(--toolbar-border);
+  border-radius: 5px;
   cursor: pointer;
   font-size: 11px;
-  color: var(--toolbar-muted);
   font-family: inherit;
-  padding: 0;
-  transition: color 0.1s;
+  color: var(--toolbar-muted);
+  padding: 2px 8px;
+  height: 22px;
+  transition: color 0.1s, border-color 0.1s, background 0.1s;
 }
 
 .anim-history-clear:hover {
   color: var(--toolbar-fg);
+  border-color: var(--toolbar-border);
+  background: rgba(128, 128, 128, 0.08);
+}
+
+.anim-history-clear:active {
+  background: rgba(128, 128, 128, 0.15);
 }
 
 .history-item {

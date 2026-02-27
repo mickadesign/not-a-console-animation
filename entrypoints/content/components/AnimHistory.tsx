@@ -51,7 +51,6 @@ export function AnimHistory({ groups, openId, onOpenChange, onClear }: AnimHisto
   return (
     <div className="anim-history">
       <div className="anim-history-hd">
-        <span className="anim-history-label">Captured</span>
         <button className="anim-history-clear" onClick={onClear}>Clear</button>
       </div>
 
