@@ -84,7 +84,7 @@
   border: 1px solid var(--toolbar-border);
   border-radius: 12px;
   padding: 10px 12px 8px;
-  min-width: 210px;
+  width: 240px;
   box-shadow: var(--toolbar-shadow);
   color: var(--toolbar-fg);
   user-select: none;
