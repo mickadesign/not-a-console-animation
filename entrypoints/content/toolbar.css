@@ -145,8 +145,8 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: 16px;
-  height: 16px;
+  width: 24px;
+  height: 24px;
   background: none;
   border: none;
   border-radius: 4px;
@@ -204,9 +204,8 @@
 
 .easing-meta {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 8px;
+  flex-direction: column;
+  gap: 2px;
   padding-bottom: 2px;
 }
 
@@ -214,10 +213,7 @@
   font-family: 'SF Mono', 'Fira Code', ui-monospace, monospace;
   font-size: 12px;
   color: var(--toolbar-fg);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  min-width: 0;
+  word-break: break-all;
 }
 
 .easing-timing {
@@ -268,6 +264,12 @@
 
 .history-item {
   margin-bottom: 1px;
+  border-radius: 6px;
+  transition: background 0.1s;
+}
+
+.history-item.is-open {
+  background: var(--toolbar-pill-sel);
 }
 
 .history-item-hd {
@@ -290,8 +292,9 @@
   background: var(--toolbar-pill-hover);
 }
 
+/* Card bg is provided by parent .history-item.is-open — button is transparent */
 .history-item-hd.is-open {
-  background: var(--toolbar-pill-sel);
+  background: none;
 }
 
 .history-item-title {

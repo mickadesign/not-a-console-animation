@@ -139,7 +139,7 @@ export function Toolbar({ onSpeedChange, onStateChange, initialEnabled = false, 
 
         const id    = ++historyIdRef.current
         const group: HistoryGroup = { id, anims }
-        setHistoryGroups(prev => [group, ...prev].slice(0, 10))
+        setHistoryGroups(prev => [...prev, group].slice(-10))
         setOpenGroupId(id)
       }, 80)
     }

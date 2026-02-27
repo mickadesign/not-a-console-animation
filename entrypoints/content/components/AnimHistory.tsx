@@ -55,56 +55,65 @@ export function AnimHistory({ groups, openId, onOpenChange, onClear }: AnimHisto
         <button className="anim-history-clear" onClick={onClear}>Clear</button>
       </div>
 
-      {groups.map((group) => {
-        const isOpen = openId === group.id
-        const idx    = innerIndex[group.id] ?? 0
+      <AnimatePresence initial={false}>
+        {groups.map((group) => {
+          const isOpen = openId === group.id
+          const idx    = innerIndex[group.id] ?? 0
 
-        return (
-          <div key={group.id} className="history-item">
-            <button
-              className={`history-item-hd${isOpen ? ' is-open' : ''}`}
-              onClick={() => onOpenChange(isOpen ? null : group.id)}
+          return (
+            <motion.div
+              key={group.id}
+              className={`history-item${isOpen ? ' is-open' : ''}`}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.18, ease: 'easeOut' }}
             >
-              <span className="history-item-title">{getGroupTitle(group)}</span>
-              <motion.span
-                className="history-item-chevron"
-                animate={{ rotate: isOpen ? 90 : 0 }}
-                transition={{ duration: 0.15, ease: 'easeInOut' }}
-                style={{ display: 'inline-flex', transformOrigin: '50% 50%' }}
-                aria-hidden="true"
+              <button
+                className={`history-item-hd${isOpen ? ' is-open' : ''}`}
+                onClick={() => onOpenChange(isOpen ? null : group.id)}
               >
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="9 6 15 12 9 18" />
-                </svg>
-              </motion.span>
-            </button>
-
-            <AnimatePresence initial={false}>
-              {isOpen && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{
-                    height: springs.fast,
-                    opacity: { type: 'tween', duration: 0.1 },
-                  }}
-                  style={{ overflow: 'hidden' }}
+                <span className="history-item-title">{getGroupTitle(group)}</span>
+                <motion.span
+                  className="history-item-chevron"
+                  animate={{ rotate: isOpen ? 90 : 0 }}
+                  transition={{ duration: 0.15, ease: 'easeInOut' }}
+                  style={{ display: 'inline-flex', transformOrigin: '50% 50%' }}
+                  aria-hidden="true"
                 >
-                  <EasingPanel
-                    inset
-                    anims={group.anims}
-                    index={idx}
-                    onIndexChange={(i) =>
-                      setInnerIndex(prev => ({ ...prev, [group.id]: i }))
-                    }
-                  />
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        )
-      })}
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="9 6 15 12 9 18" />
+                  </svg>
+                </motion.span>
+              </button>
+
+              <AnimatePresence initial={false}>
+                {isOpen && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{
+                      height: springs.fast,
+                      opacity: { type: 'tween', duration: 0.1 },
+                    }}
+                    style={{ overflow: 'hidden' }}
+                  >
+                    <EasingPanel
+                      inset
+                      anims={group.anims}
+                      index={idx}
+                      onIndexChange={(i) =>
+                        setInnerIndex(prev => ({ ...prev, [group.id]: i }))
+                      }
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          )
+        })}
+      </AnimatePresence>
     </div>
   )
 }
