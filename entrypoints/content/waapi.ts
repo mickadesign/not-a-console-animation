@@ -69,9 +69,3 @@ export function startWAAPIObserver(getSpeed: () => number): void {
     attributeFilter: ['class', 'style', 'data-state', 'data-open', 'aria-expanded', 'hidden'],
   })
 }
-
-export function stopWAAPIObserver(): void {
-  _observer?.disconnect()
-  _observer = null
-  observerEnabled = false
-}

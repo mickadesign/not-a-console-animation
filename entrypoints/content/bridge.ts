@@ -21,7 +21,3 @@ export function sendSetSpeed(speed: number): void {
     '*',
   )
 }
-
-export function readToken(): string {
-  return getToken()
-}

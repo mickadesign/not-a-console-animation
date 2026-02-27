@@ -4,7 +4,6 @@ interface StatusBadgesProps {
   rafIntercepted: boolean
   gsapDetected: boolean
   animationCount: number
-  enabled: boolean
 }
 
 export function StatusBadges({ rafIntercepted, gsapDetected, animationCount }: StatusBadgesProps) {

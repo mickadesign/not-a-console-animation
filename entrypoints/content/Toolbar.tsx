@@ -240,7 +240,6 @@ export function Toolbar({ onSpeedChange, onStateChange, initialEnabled = false, 
                 rafIntercepted={status.rafIntercepted}
                 gsapDetected={status.gsapDetected}
                 animationCount={status.animationCount}
-                enabled={enabled}
               />
             </div>
           </motion.div>
