@@ -113,6 +113,7 @@
   color: var(--toolbar-fg);
   flex: 1;
   pointer-events: none;
+  padding-left: 4px;
 }
 
 /* ── Easing inspector panel ────────────────────────────────────────── */
@@ -126,9 +127,21 @@
 /* When rendered inside an accordion item — no separator, tighter top spacing */
 .easing-panel--inset {
   border-top: none;
-  padding-top: 4px;
+  padding: 4px 6px;
   margin-top: 0;
-  padding-bottom: 4px;
+}
+
+/* Strip inner horizontal padding — the container's 6px provides it uniformly */
+.easing-panel--inset .easing-curve-bg {
+  padding: 0;
+}
+
+.easing-panel--inset .easing-meta {
+  padding: 0 0 2px;
+}
+
+.easing-panel--inset .easing-spring-hint {
+  margin: 3px 0 2px;
 }
 
 .easing-nav {
@@ -181,7 +194,7 @@
 
 .easing-nav-prop {
   font-family: 'SF Mono', 'Fira Code', ui-monospace, monospace;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--toolbar-fg);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -190,7 +203,7 @@
 }
 
 .easing-nav-count {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--toolbar-muted);
 }
 
@@ -204,10 +217,44 @@
 }
 
 .easing-meta {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 2px;
   padding: 0 8px 2px;
+}
+
+.easing-copy-btn {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: var(--toolbar-curve-bg);
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  color: var(--toolbar-muted);
+  opacity: 0;
+  transition: opacity 0.15s, color 0.1s;
+}
+
+.easing-meta:hover .easing-copy-btn,
+.easing-copy-btn.is-copied {
+  opacity: 1;
+}
+
+.easing-copy-btn:hover {
+  color: var(--toolbar-fg);
+}
+
+.easing-copy-btn.is-copied {
+  color: var(--toolbar-curve-line);
+  cursor: default;
 }
 
 .easing-value {
@@ -224,39 +271,52 @@
   flex-shrink: 0;
 }
 
+.easing-spring-hint {
+  margin: 3px 8px 2px;
+  font-size: 12px;
+  color: var(--toolbar-muted);
+  opacity: 0.7;
+}
+
 /* ── Animation history accordion ───────────────────────────────────── */
 
 .anim-history {
   padding-top: 8px;
   margin-top: 2px;
-  border-top: 1px solid var(--toolbar-border);
   padding-bottom: 2px;
 }
 
 .anim-history-hd {
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
+  justify-content: space-between;
   margin-bottom: 4px;
+}
+
+.anim-history-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--toolbar-muted);
+  padding-left: 4px;
 }
 
 .anim-history-clear {
   display: inline-flex;
   align-items: center;
   background: none;
-  border: 1px solid var(--toolbar-border);
+  border: none;
   border-radius: 5px;
   cursor: pointer;
-  font-size: 11px;
+  font-size: 12px;
   font-family: inherit;
   color: var(--toolbar-muted);
-  padding: 2px 8px;
+  padding: 2px 6px;
   height: 22px;
-  transition: color 0.1s, border-color 0.1s, background 0.1s;
+  transition: color 0.1s, background 0.1s;
 }
 
 .anim-history-clear:hover {
   color: var(--toolbar-fg);
-  border-color: var(--toolbar-border);
   background: rgba(128, 128, 128, 0.08);
 }
 
@@ -264,55 +324,4 @@
   background: rgba(128, 128, 128, 0.15);
 }
 
-.history-item {
-  margin-bottom: 1px;
-  border-radius: 6px;
-  transition: background 0.1s;
-}
-
-.history-item.is-open {
-  background: var(--toolbar-pill-sel);
-}
-
-.history-item-hd {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 6px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 5px 6px;
-  border-radius: 6px;
-  font-family: inherit;
-  text-align: left;
-  transition: background 0.1s;
-}
-
-.history-item-hd:hover {
-  background: var(--toolbar-pill-hover);
-}
-
-/* Card bg is provided by parent .history-item.is-open — button is transparent */
-.history-item-hd.is-open {
-  background: none;
-}
-
-.history-item-title {
-  font-family: 'SF Mono', 'Fira Code', ui-monospace, monospace;
-  font-size: 11px;
-  color: var(--toolbar-fg);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  min-width: 0;
-  flex: 1;
-}
-
-.history-item-chevron {
-  font-size: 12px;
-  color: var(--toolbar-muted);
-  flex-shrink: 0;
-  line-height: 1;
-}
+/* Accordion item/trigger/chevron styles are now inline in Accordion.tsx */

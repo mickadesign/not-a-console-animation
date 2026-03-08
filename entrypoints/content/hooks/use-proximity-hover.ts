@@ -71,25 +71,13 @@ export function useProximityHover<T extends HTMLElement>(
       const container = containerRef.current
       if (!container) return
 
-      const containerRect = container.getBoundingClientRect()
-      const scrollLeft = container.scrollLeft
-      const borderTop = container.clientTop
-      const borderLeft = container.clientLeft
       const mousePos = axis === 'x' ? e.clientX : e.clientY
 
       let closestIndex: number | null = null
       let closestDistance = Infinity
-      const rects: ItemRect[] = []
 
       itemsRef.current.forEach((element, index) => {
         const rect = element.getBoundingClientRect()
-        rects[index] = {
-          top: rect.top - containerRect.top - borderTop,
-          height: rect.height,
-          left: rect.left - containerRect.left + scrollLeft - borderLeft,
-          width: rect.width,
-        }
-
         const itemCenter =
           axis === 'x'
             ? rect.left + rect.width / 2
@@ -102,7 +90,6 @@ export function useProximityHover<T extends HTMLElement>(
         }
       })
 
-      setItemRects(rects)
       setActiveIndex(closestIndex)
     },
     [axis, containerRef]

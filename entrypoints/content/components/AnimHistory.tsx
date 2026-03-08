@@ -1,7 +1,8 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { EasingPanel, formatMs, type AnimInfo } from './EasingPanel'
-import { springs } from '../lib/springs'
+import { AccordionGroup, AccordionItem, AccordionTrigger, AccordionContent } from './Accordion'
+import { camelToKebab } from '../lib/css-utils'
 
 export interface HistoryGroup {
   id: number
@@ -15,13 +16,6 @@ interface AnimHistoryProps {
   onClear: () => void
 }
 
-// ── Helpers ───────────────────────────────────────────────────────────
-
-function camelToKebab(s: string): string {
-  // Leave CSS custom properties (--foo) untouched
-  if (s.startsWith('--')) return s
-  return s.replace(/([A-Z])/g, c => '-' + c.toLowerCase())
-}
 
 function getGroupTitle(group: HistoryGroup): string {
   const first = group.anims[0]
@@ -48,56 +42,36 @@ export function AnimHistory({ groups, openId, onOpenChange, onClear }: AnimHisto
 
   if (groups.length === 0) return null
 
+  // Map openId (number | null) → Accordion value (string)
+  const accordionValue = openId !== null ? String(openId) : ''
+
   return (
     <div className="anim-history">
       <div className="anim-history-hd">
+        <span className="anim-history-label">Captured</span>
         <button className="anim-history-clear" onClick={onClear}>Clear</button>
       </div>
 
-      <AnimatePresence initial={false}>
-        {groups.map((group) => {
-          const isOpen = openId === group.id
-          const idx    = innerIndex[group.id] ?? 0
+      <AccordionGroup
+        value={accordionValue}
+        onValueChange={(val) => onOpenChange(val ? Number(val) : null)}
+        collapsible
+      >
+        <AnimatePresence initial={false}>
+          {groups.map((group, i) => {
+            const idx = innerIndex[group.id] ?? 0
 
-          return (
-            <motion.div
-              key={group.id}
-              className={`history-item${isOpen ? ' is-open' : ''}`}
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: 0.18, ease: 'easeOut' }}
-            >
-              <button
-                className={`history-item-hd${isOpen ? ' is-open' : ''}`}
-                onClick={() => onOpenChange(isOpen ? null : group.id)}
+            return (
+              <motion.div
+                key={group.id}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.18, ease: 'easeOut' }}
               >
-                <span className="history-item-title">{getGroupTitle(group)}</span>
-                <motion.span
-                  className="history-item-chevron"
-                  animate={{ rotate: isOpen ? 90 : 0 }}
-                  transition={{ duration: 0.15, ease: 'easeInOut' }}
-                  style={{ display: 'inline-flex', transformOrigin: '50% 50%' }}
-                  aria-hidden="true"
-                >
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="9 6 15 12 9 18" />
-                  </svg>
-                </motion.span>
-              </button>
-
-              <AnimatePresence initial={false}>
-                {isOpen && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{
-                      height: springs.fast,
-                      opacity: { type: 'tween', duration: 0.1 },
-                    }}
-                    style={{ overflow: 'hidden' }}
-                  >
+                <AccordionItem value={String(group.id)} index={i}>
+                  <AccordionTrigger>{getGroupTitle(group)}</AccordionTrigger>
+                  <AccordionContent>
                     <EasingPanel
                       inset
                       anims={group.anims}
@@ -106,13 +80,13 @@ export function AnimHistory({ groups, openId, onOpenChange, onClear }: AnimHisto
                         setInnerIndex(prev => ({ ...prev, [group.id]: i }))
                       }
                     />
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.div>
-          )
-        })}
-      </AnimatePresence>
+                  </AccordionContent>
+                </AccordionItem>
+              </motion.div>
+            )
+          })}
+        </AnimatePresence>
+      </AccordionGroup>
     </div>
   )
 }

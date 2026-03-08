@@ -188,7 +188,10 @@ export function Toolbar({ onSpeedChange, onStateChange, initialEnabled = false, 
     })
   }
 
-  const onPointerUp = () => { dragging.current = false }
+  const onPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    dragging.current = false
+    ;(e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId)
+  }
 
   // Keep ref in sync so capture callbacks can read current length synchronously
   historyGroupsRef.current = historyGroups

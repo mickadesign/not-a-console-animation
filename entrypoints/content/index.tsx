@@ -9,7 +9,7 @@ import React from 'react'
 import { createRoot } from 'react-dom/client'
 import { SlooowSpeed, SLOOOW_TAG } from '../../src/shared/types'
 import { applyWAAPI, resetWAAPI, countWAAPI, setObserverEnabled, startWAAPIObserver } from './waapi'
-import { applyGSAP, resetGSAP, startGSAPPolling } from './gsap'
+import { applyGSAP, resetGSAP, startGSAPPolling, stopGSAPPolling } from './gsap'
 import { sendSetSpeed } from './bridge'
 import { Toolbar } from './Toolbar'
 import { readSessionState, writeSessionState } from './session-store'
@@ -81,7 +81,7 @@ export default defineContentScript({
     startWAAPIObserver(() => currentSpeed ?? 1)
 
     // ── Listen for status reports from MAIN world (SPA re-navigation) ──
-    window.addEventListener('message', (e: MessageEvent) => {
+    function handleStatusMessage(e: MessageEvent) {
       if (e.source !== window) return
       const d = e.data
       if (!d || d.tag !== SLOOOW_TAG || d.type !== 'SLOOOW_STATUS_REPORT') return
@@ -89,9 +89,11 @@ export default defineContentScript({
         gsapDetected = true
         dispatchStatusEvent({ gsapDetected: true })
       }
-    })
+    }
+    window.addEventListener('message', handleStatusMessage)
 
     // ── Toolbar mount via Shadow DOM ───────────────────────────────────
+    let themeObserver: MutationObserver | null = null
     const ui = await createShadowRootUi(ctx, {
       name: 'slooow-toolbar',
       position: 'overlay',
@@ -121,6 +123,9 @@ export default defineContentScript({
       },
       onRemove(root) {
         root?.unmount()
+        themeObserver?.disconnect()
+        stopGSAPPolling()
+        window.removeEventListener('message', handleStatusMessage)
       },
     })
 
@@ -129,8 +134,12 @@ export default defineContentScript({
       applyAllLayers(currentSpeed)
     }
 
-    // Show or hide based on restored visibility
+    // ── Mount then apply visibility ────────────────────────────────────
+    // mount() must come first: WXT's applyPosition() sets display:block
+    // on the shadow host, which would override an earlier display:none.
+    // Setting display *after* mount ensures our value wins.
     const hostEl = ui.shadowHost as HTMLElement
+    ui.mount()
     hostEl.style.display = visible ? '' : 'none'
 
     // ── Toggle toolbar visibility ──────────────────────────────────────
@@ -173,14 +182,11 @@ export default defineContentScript({
     }
 
     syncTheme()
-    const themeObserver = new MutationObserver(syncTheme)
+    themeObserver = new MutationObserver(syncTheme)
     themeObserver.observe(document.documentElement, {
       attributes: true,
       attributeFilter: ['class'],
     })
-
-    // Mount the UI element into the DOM
-    ui.mount()
   },
 })
 

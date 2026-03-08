@@ -14,7 +14,7 @@ function getGSAPTimeline(): { timeScale: (n?: number) => number } | null {
   return gsap?.globalTimeline ?? TweenMax?.globalTimeline ?? null
 }
 
-export function detectGSAP(): boolean {
+function detectGSAP(): boolean {
   return getGSAPTimeline() !== null
 }
 

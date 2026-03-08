@@ -9,9 +9,7 @@ export default defineConfig({
     name: 'Slooow',
     description: 'Slow down web animations in real time. For designers.',
     version: '1.0.0',
-    permissions: ['scripting', 'activeTab', 'storage'],
-    // No host_permissions for MVP — activeTab only, lower CWS review friction.
-    // Upgrade to host_permissions: ['<all_urls>'] in v1.1 if rAF pre-patching is needed.
+    permissions: ['activeTab'],
     icons: {
       16:  'icons/icon16.png',
       48:  'icons/icon48.png',
