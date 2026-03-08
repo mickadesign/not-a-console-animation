@@ -42,7 +42,6 @@ const Switch = forwardRef<HTMLButtonElement, SwitchProps>(
           cursor: disabled ? 'not-allowed' : 'pointer',
           opacity: disabled ? 0.5 : 1,
           flexShrink: 0,
-          outline: 'none',
           ...style,
         }}
         {...props}

@@ -21,6 +21,7 @@
   --toolbar-track-off:   #e5e5e5;
   --toolbar-curve-bg:    #f0f0f0;
   --toolbar-curve-line:  #525252;
+  --toolbar-focus-ring:  #6B97FF;
 }
 
 /* ── Dark theme: OS preference (applies when page gives no signal) ── */
@@ -39,6 +40,7 @@
     --toolbar-track-off:   #525252;
     --toolbar-curve-bg:    #262626;
     --toolbar-curve-line:  #a3a3a3;
+    --toolbar-focus-ring:  #6B97FF;
   }
 }
 
@@ -57,6 +59,7 @@
   --toolbar-track-off:   #525252;
   --toolbar-curve-bg:    #262626;
   --toolbar-curve-line:  #a3a3a3;
+  --toolbar-focus-ring:  #6B97FF;
 }
 
 /* ── Light theme: explicit page signal (overrides OS dark preference) ── */
@@ -72,6 +75,20 @@
   --toolbar-pill-sel:    rgba(212, 212, 212, 0.5);
   --toolbar-pill-hover:  rgba(229, 229, 229, 0.6);
   --toolbar-track-off:   #e5e5e5;
+  --toolbar-focus-ring:  #6B97FF;
+}
+
+/* ── Global focus-visible ring ────────────────────────────────────────── */
+
+button:focus-visible {
+  outline: 1px solid var(--toolbar-focus-ring);
+  outline-offset: 2px;
+}
+
+[role="switch"]:focus-visible {
+  outline: 1px solid var(--toolbar-focus-ring);
+  outline-offset: 2px;
+  border-radius: 12px;
 }
 
 /* ── Toolbar shell ─────────────────────────────────────────────────── */
@@ -283,7 +300,7 @@
 .anim-history {
   padding-top: 8px;
   margin-top: 2px;
-  padding-bottom: 2px;
+  padding-bottom: 6px;
 }
 
 .anim-history-hd {
@@ -313,6 +330,7 @@
   padding: 2px 6px;
   height: 22px;
   transition: color 0.1s, background 0.1s;
+  outline-offset: 1px;
 }
 
 .anim-history-clear:hover {

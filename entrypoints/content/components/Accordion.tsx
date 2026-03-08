@@ -163,6 +163,9 @@ const AccordionGroup = forwardRef<HTMLDivElement, AccordionGroupProps>(
       flexDirection: 'column',
       gap: 1,
       userSelect: 'none',
+      overflow: 'visible',
+      padding: 4,
+      margin: -4,
       ...style,
     }
 
@@ -286,15 +289,15 @@ const AccordionGroup = forwardRef<HTMLDivElement, AccordionGroupProps>(
                     borderRadius: BORDER_RADIUS,
                     pointerEvents: 'none',
                     zIndex: 20,
-                    border: '1px solid var(--toolbar-muted)',
+                    border: '1px solid var(--toolbar-focus-ring)',
                     background: 'transparent',
                   }}
                   initial={false}
                   animate={{
-                    left: focusRect.left - 2,
-                    top: focusRect.top - 2,
-                    width: focusRect.width + 4,
-                    height: focusRect.height + 4,
+                    left: focusRect.left - 3,
+                    top: focusRect.top - 3,
+                    width: focusRect.width + 6,
+                    height: focusRect.height + 6,
                   }}
                   exit={{ opacity: 0, transition: { duration: 0.12 } }}
                   transition={{

@@ -230,7 +230,7 @@ export function Toolbar({ onSpeedChange, onStateChange, initialEnabled = false, 
             }}
             style={{ overflow: 'hidden' }}
           >
-            <div style={{ paddingTop: 9 }}>
+            <div style={{ paddingTop: 16 }}>
               <SubtleTab
                 selectedIndex={SLOOOW_SPEEDS.indexOf(speed)}
                 onSelect={(idx) => handleSpeedSelect(SLOOOW_SPEEDS[idx])}
